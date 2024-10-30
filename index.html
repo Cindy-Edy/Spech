@@ -328,7 +328,7 @@ function translateText(text, targetLang) {
     output.textContent = translatedText;
 }
 
-// Fungsi untuk mulai mendengarkan ketika tombol ditekan
+// Mulai mendengarkan saat tombol ditekan
 micBtn.addEventListener('click', () => {
     recognition.start();
     output.textContent = 'Sindi siap mendengarkan...';
@@ -340,8 +340,11 @@ recognition.onresult = (event) => {
     output.textContent = `Anda berkata: "${transcript}"`;
 
     // Periksa jika nama "Sindi" dipanggil
-    if (transcript.includes('Cindy')) {
+    if (transcript.includes('cindy')) {
         speak('Iya sayangku, ada yang bisa sindi bantu?');
+        output.textContent = 'Sindi mendengarkan...';
+
+        // Mendengarkan perintah berikutnya
         recognition.onresult = (event) => {
             const command = event.results[event.resultIndex][0].transcript.toLowerCase();
             output.textContent = `Anda berkata: "${command}"`;
@@ -449,6 +452,17 @@ recognition.onresult = (event) => {
         output.textContent = 'Nama Sindi tidak disebutkan. Terus mendengarkan...';
     }
 };
+// Kesalahan saat mengenali suara
+recognition.onerror = (event) => {
+    output.textContent = 'Terjadi kesalahan, coba lagi.';
+    speak('Maaf, terjadi kesalahan.');
+};
+
+// Mendengarkan terus tanpa henti
+recognition.onend = () => {
+    recognition.start(); // Mulai mendengarkan lagi setelah selesai
+};
+
 // Kesalahan saat mengenali suara
 recognition.onerror = (event) => {
     output.textContent = 'Terjadi kesalahan, coba lagi.';
