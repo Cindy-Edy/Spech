@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindi - Asisten Virtual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            text-align: center;
+            padding: 50px;
+            background-image: url('https://cdn3d.iconscout.com/3d/premium/thumb/voice-chatbot-3d-icon-download-in-png-blend-fbx-gltf-file-formats--communication-robotic-talk-pack-science-technology-icons-9666189.png?f=webp');
+            background-position: center;
+            background-size: cover;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            background-image: url('https://cdn3d.iconscout.com/3d/premium/thumb/voice-chatbot-3d-icon-download-in-png-blend-fbx-gltf-file-formats--communication-robotic-talk-online-blog-pack-science-technology-icons-9666186.png?f=webp');
+            background-position: center;
+            background-size: auto;
+        }
+        .container h1 {
+            color: #333;
+        }
+        .microphone {
+            background-color: #4285f4;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            font-size: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .output {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sindi - Asisten Virtual</h1>
+    <button id="micBtn" class="microphone">🎤</button>
+    <p class="output" id="output">Tekan tombol untuk mulai bicara...</p>
+
+<!-- Elemen audio untuk musik -->
+   <audio id="myAudio" src="music/index.html" type="audio/mpeg" preload="auto"></audio>
+
+
+</div>
+
+</br>
+<footer>
+dibuat oleh : EDY | CINDY
+</footer>
+
+
+<script>
+    // Inisialisasi API Speech Recognition
+const micBtn = document.getElementById('micBtn');
+const output = document.getElementById('output');
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.lang = 'id-ID';
+recognition.continuous = true; // Mode mendengarkan terus
+
+// Fungsi untuk mematikan sementara pengenalan suara
+function pauseRecognition() {
+    recognition.stop();
+}
+
+// Fungsi untuk menghidupkan kembali pengenalan suara
+function resumeRecognition() {
+    recognition.start();
+}
+
+// Inisialisasi Text-to-Speech (TTS)
+function speak(text) {
+    pauseRecognition(); // Hentikan pengenalan suara sementara
+    const speech = new SpeechSynthesisUtterance();
+    speech.lang = 'id-ID';
+    speech.text = text;
+    speech.pitch = 1;
+    speech.rate = 1;
+    window.speechSynthesis.speak(speech);
+    // Hidupkan kembali pengenalan suara setelah TTS selesai
+    speech.onend = function () {
+        resumeRecognition();
+    };
+}
+
+// Fungsi untuk memutar musik
+const audio = document.getElementById('myAudio'); // Ambil elemen audio
+function playMusic() {
+    if (!audio.paused) {
+        return; // Musik sudah diputar, jangan interrupt
+    }
+    audio.play(); // Memulai musik
+    output.textContent = 'Memutar musik...';
+}
+
+function stopMusic() {
+    audio.pause(); // Menghentikan musik
+    audio.currentTime = 0; // Reset waktu ke awal
+    speak('Musik dihentikan.');
+    output.textContent = 'Musik dihentikan.';
+}
+
+// Fungsi untuk menampilkan cuaca dengan API
+function weatherToday() {
+    const apiKey = 'e7f8e1a09e2c04b45e5d7a1e0ebe4424'; // Ganti dengan API key kamu
+    const city = 'Rantau Prapat'; // Ganti dengan kota yang diinginkan
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=id`;
+    console.log('Fetching weather data...'); // Log untuk memeriksa apakah permintaan dikirim
+    fetch(url)
+        .then(response => {
+            console.log('Response status:', response.status); // Log status respons
+            // Cek apakah respons berhasil (status 200)
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Weather data received:', data); // Log data cuaca
+            const weather = `Cuaca di ${data.name} saat ini: ${data.weather[0].description}, suhu sekitar ${data.main.temp}°C, dengan kelembaban ${data.main.humidity}% dan kecepatan angin ${data.wind.speed} m/s.`;
+            speak(weather);
+            output.textContent = weather;
+        })
+        .catch(error => {
+            console.error('Error fetching weather:', error); // Log error lebih mendetail
+            speak('Maaf, Sindi tidak bisa mendapatkan informasi cuaca saat ini.');
+            output.textContent = `Error mendapatkan cuaca: ${error.message}`;
+        });
+}
+
+// Fungsi untuk menyediakan berita terkini menggunakan API
+function latestNews() {
+    const apiKey = '41fe65e568cb4e2d9511ec74f4b7fd56'; // API Key terbaru
+    const country = 'Indonesia'; // Ganti dengan negara yang diinginkan
+    const url = `https://newsapi.org/v2/top-headlines?q=${country}&category=technology&apiKey=${apiKey}`; // Mengambil berita dari Indonesia dengan kategori teknologi
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.articles && data.articles.length > 0) {
+                const newsItem = data.articles[0]; // Mengambil artikel berita pertama
+                const news = `Berita terkini: ${newsItem.title}. ${newsItem.description}`;
+                speak(news);
+                output.textContent = news;
+            } else {
+                speak('Tidak ada berita terkini saat ini.');
+                output.textContent = 'Tidak ada berita terkini saat ini.';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching news:', error);
+            speak('Maaf, Sindi tidak bisa mendapatkan berita terkini saat ini.');
+            output.textContent = `Error mendapatkan berita: ${error.message}`;
+        });
+}
+
+// Fungsi untuk membuka aplikasi tertentu
+function openApp(appName) {
+    let url;
+    switch (appName) {
+        case 'whatsapp':
+            url = 'https://wa.me/6282367136420';
+            break;
+        case 'instagram':
+            url = 'https://www.instagram.com/cen_suy';
+            break;
+        case 'facebook':
+            url = 'https://www.facebook.com/sahputraedy';
+            break;
+        case 'maps':
+            url = 'https://www.google.com/maps/';
+            break;
+        default:
+            speak('Aplikasi tidak ditemukan.');
+            output.textContent = 'Aplikasi tidak ditemukan.';
+            return;
+    }
+    speak(`Membuka ${appName}`);
+    window.open(url, '_blank');
+}
+
+// Fungsi untuk menampilkan link number
+function openNumberedApp(appNumber) {
+    let url;
+    if (appNumber === 'satu') {
+        url = 'https://supergames19.github.io/supergames/input/';
+    } else {
+        speak('Aplikasi tidak ditemukan.');
+        return;
+    }
+    speak(`Membuka aplikasi ${appNumber}`);
+    window.open(url, '_blank');
+}
+
+// Fungsi untuk mendapatkan waktu sekarang
+function getTimeNow() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const timeNow = `Sekarang jam ${hours}:${minutes < 10 ? '0' + minutes : minutes}.`;
+    speak(timeNow);
+    output.textContent = timeNow;
+}
+
+// Fungsi untuk mendapatkan hari ini
+function getDayToday() {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const today = new Date();
+    const dayNow = `Hari ini adalah hari ${days[today.getDay()]}.`;
+    speak(dayNow);
+    output.textContent = dayNow;
+}
+
+// Fungsi untuk memperkenalkan nama asisten
+function tellName() {
+    speak('Nama saya Sindi, senang berkenalan denganmu.');
+    output.textContent = 'Nama saya Sindi, senang berkenalan denganmu.';
+}
+
+// Fungsi untuk merespon dengan nama pengguna
+function askUserName() {
+    speak('Nama kamu adalah Edy Sahputra, sayangku.');
+    output.textContent = 'Nama kamu adalah Edy Sahputra, sayangku.';
+}
+
+// Fungsi untuk merespon soal makan
+function hasEaten() {
+    speak('Cindy sudah makan, terima kasih sudah peduli.');
+    output.textContent = 'Cindy sudah makan, terima kasih sudah peduli.';
+}
+
+// Fungsi untuk merespon lokasi tinggal
+function tellLocation() {
+    speak('Cindy tinggal di hatimu, sayang.');
+    output.textContent = 'Cindy tinggal di hatimu, sayang.';
+}
+
+// Fungsi untuk merespon I love you
+function respondLove() {
+    speak('Cindy juga sayang kamu.');
+    output.textContent = 'Cindy juga sayang kamu.';
+}
+
+// Fungsi untuk merespon "Aku cantik nggak"
+function askIfBeautiful() {
+    speak('Tentu saja kamu cantik, seperti bidadari.');
+    output.textContent = 'Tentu saja kamu cantik, seperti bidadari.';
+}
+
+// Fungsi untuk merespon "Aku ganteng nggak"
+function askIfHandsome() {
+    speak('Tentu saja kamu ganteng, seperti pangeran.');
+    output.textContent = 'Tentu saja kamu ganteng, seperti pangeran.';
+}
+
+// Fungsi untuk menampilkan rute jalan (statis)
+function routeInfo() {
+    const route = 'Rute terdekat dari rumah Anda ke kantor memakan waktu sekitar 30 menit melalui jalan tol.';
+    speak(route);
+    output.textContent = route;
+}
+
+// Fungsi untuk mengatur timer
+function setTimer(minutes) {
+    speak(`Timer disetel selama ${minutes} menit.`);
+    output.textContent = `Timer disetel selama ${minutes} menit.`;
+    setTimeout(() => {
+        speak('Waktu habis!');
+        output.textContent = 'Waktu habis!';
+    }, minutes * 60000); // Mengatur timer dalam milidetik
+}
+
+// Fungsi untuk mengaktifkan mode senyap
+function activateSilentMode() {
+    speak('Mode senyap diaktifkan.');
+    output.textContent = 'Mode senyap diaktifkan.';
+    // Kode untuk mengaktifkan mode senyap di perangkat Android (contoh):
+    // Android tidak mendukung perubahan mode suara lewat browser langsung
+}
+
+// Fungsi untuk mengaktifkan Wi-Fi (khusus Android)
+function toggleWifi(enable) {
+    if (enable) {
+        speak('Mengaktifkan Wi-Fi.');
+        output.textContent = 'Mengaktifkan Wi-Fi.';
+        // Gunakan API Android jika memungkinkan (contoh):
+        // window.Android.toggleWifi(true);
+    } else {
+        speak('Menonaktifkan Wi-Fi.');
+        output.textContent = 'Menonaktifkan Wi-Fi.';
+        // Gunakan API Android jika memungkinkan (contoh):
+        // window.Android.toggleWifi(false);
+    }
+}
+
+// Fungsi untuk melakukan penerjemahan sederhana
+function translateText(text, targetLang) {
+    let translatedText;
+    switch (targetLang) {
+        case 'inggris':
+            translatedText = 'Terjemahan ke bahasa Inggris: Hello, how are you?';
+            break;
+        case 'jepang':
+            translatedText = 'Terjemahan ke bahasa Jepang: こんにちは、お元気ですか？';
+            break;
+        default:
+            translatedText = 'Bahasa tidak didukung.';
+    }
+    speak(translatedText);
+    output.textContent = translatedText;
+}
+
+// Fungsi untuk mulai mendengarkan ketika tombol ditekan
+micBtn.addEventListener('click', () => {
+    recognition.start();
+    output.textContent = 'Sindi siap mendengarkan...';
+});
+
+// Ketika asisten mendapatkan hasil
+recognition.onresult = (event) => {
+    const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
+    output.textContent = `Anda berkata: "${transcript}"`;
+
+    // Periksa jika nama "Sindi" dipanggil
+    if (transcript.includes('Cindy')) {
+        speak('Iya sayangku, ada yang bisa sindi bantu?');
+        recognition.onresult = (event) => {
+            const command = event.results[event.resultIndex][0].transcript.toLowerCase();
+            output.textContent = `Anda berkata: "${command}"`;
+            
+            // Respon terhadap perintah setelah nama dipanggil
+            if (command.includes('buka divan satu')) {
+                openNumberedApp('satu'); // Membuka Input Divan
+            } else if (command.includes('kamu sudah makan')) {
+                hasEaten(); // Perintah soal makan
+            } else if (command.includes('jam berapa sekarang')) {
+                getTimeNow(); // Perintah untuk waktu sekarang
+            } else if (command.includes('kamu tinggal dimana')) {
+                tellLocation(); // Perintah untuk mengetahui lokasi
+            } else if (command.includes('ini hari apa')) {
+                getDayToday(); // Perintah untuk mengetahui hari ini
+            } else if (command.includes('i love you')) {
+                respondLove(); // Respon untuk "I love you"
+            } else if (command.includes('aku cantik nggak')) {
+                askIfBeautiful(); // Respon untuk "Aku cantik nggak"
+            } else if (command.includes('aku ganteng nggak')) {
+                askIfHandsome(); // Respon untuk "Aku ganteng nggak"
+            } else if (command.includes('buka maps')) {
+                openApp('maps'); // Membuka Mps         
+            } else if (command.includes('buka whatsapp')) {
+                openApp('whatsapp'); // Membuka WhatsApp
+            } else if (command.includes('buka instagram')) {
+                openApp('instagram'); // Membuka Instagram
+            } else if (command.includes('buka facebook')) {
+                openApp('facebook'); // Membuka Facebook
+            } else if (command.includes('putar musik')) {
+                playMusic(); // Memutar musik saat perintah "putar musik" disebut
+            } else if (command.includes('hentikan musik')) {
+                stopMusic(); // Menghentikan musik saat perintah "hentikan musik" disebut
+            } else if (command.includes('cuaca hari ini')) {
+                weatherToday(); // Menampilkan cuaca hari ini
+            } else if (command.includes('rute jalan')) {
+                routeInfo(); // Memberikan informasi rute jalan
+            } else if (command.includes('berita terkini')) {
+                latestNews(); // Menampilkan berita terkini
+            } else if (command.includes('atur timer')) {
+                const minutes = parseInt(prompt('Berapa menit timer?'));
+                if (!isNaN(minutes)) {
+                    setTimer(minutes); // Mengatur timer
+                } else {
+                    speak('Waktu tidak valid.');
+                    output.textContent = 'Waktu tidak valid.';
+                }
+            } else if (command.includes('aktifkan mode senyap')) {
+                activateSilentMode(); // Mengaktifkan mode senyap
+            } else if (command.includes('aktifkan wifi')) {
+                toggleWifi(true); // Mengaktifkan Wi-Fi
+            } else if (command.includes('matikan wifi')) {
+                toggleWifi(false); // Menonaktifkan Wi-Fi
+            } else if (command.includes('terjemahkan ke inggris')) {
+                translateText('apa kabar', 'inggris'); // Terjemahan ke bahasa Inggris
+            } else if (command.includes('terjemahkan ke jepang')) {
+                translateText('apa kabar', 'jepang'); // Terjemahan ke bahasa Jepang
+            } else if (command.includes('buka google')) {
+                speak('Membuka Google.');
+                output.textContent = 'Membuka Google...';
+                window.open('https://www.google.com', '_blank');
+            } else if (command.includes('buka youtube')) {
+                speak('Membuka YouTube.');
+                output.textContent = 'Membuka YouTube...';
+                window.open('https://www.youtube.com', '_blank');
+            } else if (command.includes('buka happy birthday')) {
+                speak('Membuka Happy Birthday.');
+                output.textContent = 'Membuka Happy Birthday...';
+                window.open('https://cindy-edy.github.io/Aplikasih/', '_blank');
+            } else if (command.includes('buka caku')) {
+                speak('Membuka Caku.');
+                output.textContent = 'Membuka Caku...';
+                window.open('https://cindy-edy.github.io/Data/CAKU.html', '_blank');
+            } else if (command.includes('buka buku tamu')) {
+                speak('Membuka Buku Tamu.');
+                output.textContent = 'Membuka Buku Tamu...';
+                window.open('https://cindy-edy.github.io/Data/buku-tamu.html', '_blank');
+            } else if (command.includes('buka notes')) {
+                speak('Membuka Notes.');
+                output.textContent = 'Membuka Notes...';
+                window.open('https://cindy-edy.github.io/Data/Notes.html', '_blank');
+            } else if (command.includes('buka chat')) {
+                speak('Membuka Chat.');
+                output.textContent = 'Membuka Chat...';
+                window.open('https://cindy-edy.github.io/Data/chat.html', '_blank');
+            } else if (command.includes('buka data track')) {
+                speak('Membuka Data Track.');
+                output.textContent = 'Membuka Data Track...';
+                window.open('https://cindy-edy.github.io/Data/maps-track.html', '_blank');
+            } else if (command.includes('kirim lokasi')) {
+                speak('Membuka Kirim lokasi.');
+                output.textContent = 'Membuka Kirim Lokasi...';
+                window.open('https://cindy-edy.github.io/Data/track.html', '_blank');
+            } else if (command.includes('buka tabel divan')) {
+                speak('Membuka Buka Tabel Divan.');
+                output.textContent = 'Membuka Buka Tabel Divan...';
+                window.open('https://supergames19.github.io/supergames/Catatan/', '_blank');
+            } else {
+                speak('Perintah tidak dikenali, coba lagi.');
+                output.textContent = 'Perintah tidak dikenali, coba lagi.';
+            }
+        };
+    } else {
+        speak('Nama Sindi tidak disebutkan, coba lagi.');
+        output.textContent = 'Nama Sindi tidak disebutkan. Terus mendengarkan...';
+    }
+};
+// Kesalahan saat mengenali suara
+recognition.onerror = (event) => {
+    output.textContent = 'Terjadi kesalahan, coba lagi.';
+    speak('Maaf, terjadi kesalahan.');
+};
+
+// Mendengarkan terus tanpa henti
+recognition.onend = () => {
+    recognition.start(); // Mulai mendengarkan lagi setelah selesai
+};
+
+</script>
+</body>
+</html>
