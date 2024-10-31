@@ -188,9 +188,9 @@
         const transcript = event.results[event.resultIndex][0].transcript.toLowerCase().trim();
         resetIdleTimer(); // Reset idle timer on voice input
 
-        // Check if "Sindi" is called
-        if (transcript.includes('sindi')) {
-            let command = transcript.replace('sindi', '').trim();
+        // Check if "Cindy" is called
+        if (transcript.includes('cindy')) {
+            let command = transcript.replace('cindy', '').trim();
 
             if (command === 'matikan mikrofon') {
                 micOn = false;
@@ -237,7 +237,7 @@
                 };
             }
         } else {
-            respondWithVoice('Saya hanya akan merespons jika Anda memanggil saya dengan nama "Sindi".');
+            respondWithVoice('Saya hanya akan merespons jika Anda memanggil saya dengan nama "Cindy".');
         }
     };
 
@@ -266,5 +266,14 @@
     // Function to reset idle timer
     function resetIdleTimer() {
         clearTimeout(idleTimer);
-        idleTimer = setTimeout(()
-  
+        idleTimer = setTimeout(() => {
+            micOn = false;
+            recognition.stop();
+            document.getElementById('visualizer').style.display = 'none'; // Hide visualizer when mic off
+            respondWithVoice('Mikrofon mati karena tidak ada perintah selama 30 detik.');
+        }, 30000); // 30 seconds idle timeout
+    }
+</script>
+
+</body>
+</html>
