@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindi - Asisten Virtual Pintar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f5;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://i.makeagif.com/media/9-12-2023/lN0AeE.gif'); /* Ganti dengan URL gambar nada yang sesuai ritme suara */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        h2 {
+            color: #4CAF50;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .commands {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .command-item {
+            padding: 10px;
+            background-color: #e6e6ff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .command-item button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .command-item button:hover {
+            background-color: #d32f2f;
+        }
+
+        .visualizer {
+            margin: 20px auto;
+            width: 100px;
+            height: 100px;
+            background-image: url('https://i.makeagif.com/media/9-12-2023/lN0AeE.gif'); /* Ganti dengan URL gambar nada */
+            background-size: cover;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sindi - Asisten Virtual</h2>
+    <p>Klik tombol di bawah untuk mulai berbicara dengan Sindi.</p>
+    <button onclick="startRecognition()">Mulai Bicara</button>
+
+    <div class="commands">
+        <h3>Daftar Perintah dan Balasan:</h3>
+        <div id="commandList"></div>
+    </div>
+
+    <div class="visualizer" id="visualizer"></div> <!-- Visualizer suara -->
+</div>
+
+<!-- Tambahkan elemen audio untuk efek suara 'ding' -->
+<audio id="dingSound" src="https://example.com/ding.mp3" preload="auto"></audio> <!-- Ganti dengan URL nada -->
+
+<script>
+    // Load existing commands from localStorage
+    let commands = JSON.parse(localStorage.getItem('commands')) || [];
+    let micOn = true; // Keep track of mic status
+    let idleTimer; // Timer for 30-second mic auto-off
+
+    // Function to display commands
+    function displayCommands() {
+        const commandList = document.getElementById('commandList');
+        commandList.innerHTML = '';
+
+        commands.forEach((commandObj, index) => {
+            const commandItem = document.createElement('div');
+            commandItem.className = 'command-item';
+            commandItem.innerHTML = `
+                Perintah: "${commandObj.command}" <br>
+                Balasan: "${commandObj.response}"
+                <button onclick="deleteCommand(${index})">Hapus</button>
+            `;
+            commandList.appendChild(commandItem);
+        });
+    }
+
+    // Function to add a command
+    function addCommand(command, response) {
+        commands.push({ command, response });
+        localStorage.setItem('commands', JSON.stringify(commands));
+        displayCommands();
+    }
+
+    // Function to delete a command
+    function deleteCommand(index) {
+        commands.splice(index, 1);
+        localStorage.setItem('commands', JSON.stringify(commands));
+        displayCommands();
+    }
+
+    // Initialize display of commands
+    displayCommands();
+
+    // Speech Recognition API setup
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'id-ID'; // Bahasa Indonesia
+    recognition.interimResults = false;
+    recognition.continuous = true; // Keep mic on
+
+    // Speech Synthesis API for voice responses
+    const synth = window.speechSynthesis;
+
+    // Start speech recognition
+    function startRecognition() {
+        if (micOn) {
+            recognition.start();
+            document.getElementById('dingSound').play(); // Mainkan suara "ding"
+            document.getElementById('visualizer').style.display = 'block'; // Show visualizer
+            resetIdleTimer();
+        } else {
+            respondWithVoice('Mikrofon sedang mati.');
+        }
+    }
+
+    // Handle recognition result
+    recognition.onresult = function(event) {
+        const transcript = event.results[event.resultIndex][0].transcript.toLowerCase().trim();
+        resetIdleTimer(); // Reset idle timer on voice input
+
+        // Check if "Cindy" is called
+        if (transcript.includes('cindy')) {
+            let command = transcript.replace('cindy', '').trim();
+
+            if (command === 'matikan mikrofon') {
+                micOn = false;
+                recognition.stop();
+                document.getElementById('visualizer').style.display = 'none'; // Hide visualizer
+                respondWithVoice('Mikrofon dimatikan.');
+                return;
+            }
+
+            // Check if the command is already defined
+            const existingCommand = commands.find(c => c.command === command);
+            if (existingCommand) {
+                respondWithVoice(existingCommand.response);
+            } else {
+                respondWithVoice('Perintah tidak ditemukan. Apa respon yang ingin Anda tambahkan?');
+                recognition.stop(); // Pause recognition to wait for user input
+
+                // Wait for user input for response
+                setTimeout(() => {
+                    recognition.start(); // Resume recognition after prompt
+                }, 2000);
+
+                recognition.onresult = function(event) {
+                    const response = event.results[0][0].transcript.toLowerCase().trim();
+                    addCommand(command, response);
+                    respondWithVoice(`Balasan untuk perintah "${command}" berhasil ditambahkan.`);
+                    recognition.start(); // Keep mic on
+                };
+            }
+        } else {
+            respondWithVoice('Saya hanya akan merespons jika Anda memanggil saya dengan nama "Cindy".');
+        }
+    };
+
+    // Handle recognition errors
+    recognition.onerror = function(event) {
+        console.error(event.error);
+        respondWithVoice('Maaf, terjadi kesalahan.');
+        document.getElementById('visualizer').style.display = 'none'; // Hide visualizer on error
+    };
+
+    // Function to respond with voice
+    function respondWithVoice(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID'; // Bahasa Indonesia
+
+        // Pastikan suara langsung diputar
+        synth.cancel(); // Menghentikan suara yang sedang berjalan (jika ada)
+        synth.speak(utterance);
+
+        // Update status menjadi "speaking" dan kembali ke "listening" saat selesai
+        utterance.onend = () => {
+            document.getElementById('visualizer').style.display = 'none'; // Hide visualizer
+        };
+    }
+
+    // Function to reset idle timer
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            micOn = false;
+            recognition.stop();
+            document.getElementById('visualizer').style.display = 'none'; // Hide visualizer when mic off
+            respondWithVoice('Mikrofon mati karena tidak ada perintah selama 30 detik.');
+        }, 30000); // 30 seconds idle timeout
+    }
+</script>
+
+</body>
+</html>
