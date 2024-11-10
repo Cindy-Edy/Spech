@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edy Asisten Virtual </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            text-align: center;
+            padding: 40px;
+            background-image: url('https://i.gifer.com/origin/dc/dc412623146610157eb73e727f4d16bc_w200.gif');
+            background-position: center;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            margin: auto;
+            background-image: url('https://i.pinimg.com/originals/ae/d1/1d/aed11d6975231b91c8e992c02b8376da.gif');
+            background-position: center;
+            background-size: cover;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #4A90E2;
+            margin-bottom: 20px;
+        }
+
+        .microphone {
+            background-color: #4A90E2;
+            border: none;
+            padding: 15px;
+            color: white;
+            font-size: 24px;
+            border-radius: 50%;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .microphone:hover {
+            transform: scale(1.1);
+        }
+
+        .output {
+            font-size: 18px;
+            color: #333;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff5;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Edy Asisten Virtual </h1>
+        <button id="micBtn" class="microphone">🎤</button>
+        <p class="output" id="output"> Tekan tombol untuk mulai bicara...</p>
+
+        <!--Elemen audio untuk alarm-->
+        <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
+
+    </div>
+
+    </br>
+    <footer>
+        dibuat oleh: EDY | CINDY
+    </footer>
+
+
+    <script>
+        // Inisialisasi API Speech Recognition
+        const micBtn = document.getElementById('micBtn');
+        const output = document.getElementById('output');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'id-ID';
+        recognition.continuous = true; // Mode mendengarkan terus
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        // Fungsi untuk mematikan sementara pengenalan suara
+        function pauseRecognition() {
+            recognition.stop();
+        }
+
+        // Fungsi untuk menghidupkan kembali pengenalan suara
+        function resumeRecognition() {
+            recognition.start();
+        }
+
+        // Fungsi untuk inisialisasi Text-to-Speech (TTS) dengan suara laki-laki
+        function speak(text) {
+            pauseRecognition(); // Hentikan pengenalan suara sementara
+            const speech = new SpeechSynthesisUtterance();
+            speech.lang = 'id-ID'; // Bahasa Indonesia
+            speech.text = text;
+            speech.pitch = 0.8; // Atur pitch lebih rendah untuk suara laki-laki
+            speech.rate = 0.95; // Normal speed
+
+            // Mendapatkan daftar suara yang tersedia
+            const voices = window.speechSynthesis.getVoices();
+
+            // Pilih suara laki-laki yang tersedia (misalnya, berdasarkan nama atau index)
+            const maleVoice = voices.find(voice => voice.name.includes('Microsoft Andika') || voice.gender === 'male');
+
+            if (maleVoice) {
+                speech.voice = maleVoice;
+            } else {
+                // Jika tidak ada suara laki-laki, gunakan default
+                speech.voice = voices[0];
+            }
+
+            window.speechSynthesis.speak(speech);
+        }
+
+
+        // Fungsi untuk menampilkan cuaca dengan API
+        function weatherToday() {
+            const apiKey = 'e7f8e1a09e2c04b45e5d7a1e0ebe4424'; // Ganti dengan API key kamu
+            const city = 'Rantau Prapat'; // Ganti dengan kota yang diinginkan
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=id`;
+            console.log('Fetching weather data...'); // Log untuk memeriksa apakah permintaan dikirim
+            fetch(url)
+                .then(response => {
+                    console.log('Response status:', response.status); // Log status respons
+                    // Cek apakah respons berhasil (status 200)
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Weather data received:', data); // Log data cuaca
+                    const weather = `Cuaca di ${data.name} saat ini: ${data.weather[0].description}, suhu sekitar ${data.main.temp}°C, dengan kelembaban ${data.main.humidity}% dan kecepatan angin ${data.wind.speed} m/s.`;
+                    speak(weather);
+                    output.textContent = weather;
+                })
+                .catch(error => {
+                    console.error('Error fetching weather:', error); // Log error lebih mendetail
+                    speak('Maaf, Sindi tidak bisa mendapatkan informasi cuaca saat ini.');
+                    output.textContent = `Error mendapatkan cuaca: ${error.message}`;
+                });
+        }
+
+        // Fungsi untuk membuka aplikasi tertentu
+        function openApp(appName) {
+            let url;
+            switch (appName) {
+                case 'whatsapp':
+                    url = 'https://wa.me/';
+                    break;
+                case 'instagram':
+                    url = 'https://www.instagram.com/';
+                    break;
+                case 'facebook':
+                    url = 'https://www.facebook.com/';
+                    break;
+                case 'maps':
+                    url = 'https://www.google.com/maps/';
+                    break;
+                case 'kain':
+                    url = 'https://supergames19.github.io/supergames/input/';
+                    break;
+                default:
+                    speak('Aplikasi tidak ditemukan.');
+                    output.textContent = 'Aplikasi tidak ditemukan.';
+                    return;
+            }
+            speak(`Membuka ${appName}`);
+            window.open(url, '_blank');
+        }
+
+        // Fungsi untuk menampilkan link number
+        function openNumberedApp(appNumber) {
+            let url;
+            if (appNumber === 'satu') {
+                url = 'https://supergames19.github.io/supergames/Catatan/';
+            } else {
+                speak('Aplikasi tidak ditemukan.');
+                return;
+            }
+            speak(`Membuka aplikasi ${appNumber}`);
+            window.open(url, '_blank');
+        }
+
+        // Fungsi untuk mendapatkan waktu sekarang
+        function getTimeNow() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const timeNow = `Sekarang jam ${hours}:${minutes < 10 ? '0' + minutes : minutes}.`;
+            speak(timeNow);
+            output.textContent = timeNow;
+        }
+
+        // Fungsi untuk mendapatkan hari ini
+        function getDayToday() {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const today = new Date();
+            const dayNow = `Hari ini adalah hari ${days[today.getDay()]}.`;
+            speak(dayNow);
+            output.textContent = dayNow;
+        }
+
+        // Fungsi untuk memperkenalkan nama asisten
+        function tellName() {
+            speak('Nama saya Edy, senang berkenalan denganmu.');
+            output.textContent = 'Nama saya Edy, senang berkenalan denganmu.';
+        }
+
+        // Fungsi untuk merespon dengan nama pengguna
+        function askUserName() {
+            speak('Nama kamu adalah Cindy, sayangku.');
+            output.textContent = 'Nama kamu adalah Cindy, sayangku.';
+        }
+
+        // Fungsi untuk merespon soal makan
+        function hasEaten() {
+            speak('Edy sudah makan, terima kasih sudah peduli.');
+            output.textContent = 'Edy sudah makan, terima kasih sudah peduli.';
+        }
+
+        // Fungsi untuk merespon I love you
+        function respondLove() {
+            speak('I love you to cintaku.');
+            output.textContent = 'I love you to cintaku.';
+        }
+
+        // Fungsi untuk merespon "Aku cantik nggak"
+        function askIfBeautiful() {
+            speak('Tentu saja kamu cantik, seperti bidadari.');
+            output.textContent = 'Tentu saja kamu cantik, seperti bidadari.';
+        }
+
+        // Fungsi untuk merespon "Aku ganteng nggak"
+        function askIfHandsome() {
+            speak('Tentu saja kamu ganteng, seperti pangeran.');
+            output.textContent = 'Tentu saja kamu ganteng, seperti pangeran.';
+        }
+
+        // Fungsi untuk mendapatkan rute jalan ke lokasi tujuan
+        function getRoute(destination) {
+            if (!destination) {
+                speak("Maaf, tolong sebutkan tujuan Anda.");
+                output.textContent = "Tolong sebutkan tujuan.";
+                return;
+            }
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+            speak(`Membuka rute menuju ${destination} di Google Maps.`);
+            output.textContent = `Menampilkan rute menuju ${destination}...`;
+            window.open(mapsUrl, '_blank');
+        }
+
+        // Fungsi untuk mengatur timer
+        function setTimer(minutes) {
+            speak(`Timer disetel selama ${minutes} menit.`);
+            output.textContent = `Timer disetel selama ${minutes} menit.`;
+            setTimeout(() => {
+                speak('Waktu habis!');
+                output.textContent = 'Waktu habis!';
+            }, minutes * 60000); // Mengatur timer dalam milidetik
+        }
+
+        // Fungsi untuk kalkulator sederhana (operasi matematika)
+        function calculateMath(expression) {
+            try {
+                const result = eval(expression);
+                return `Hasil dari ${expression} adalah ${result}.`;
+            } catch (error) {
+                return 'Maaf, saya tidak bisa menghitung itu.';
+            }
+        }
+
+        // Fungsi untuk menyimpan catatan ke localStorage
+        function saveNote(note) {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.push(note);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            const response = `Catatan telah disimpan: ${note}.`;
+            speak(response);
+            output.textContent = response;
+        }
+
+        // Fungsi untuk menampilkan semua catatan dari localStorage
+        function showNotes() {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            if (notes.length > 0) {
+                const allNotes = notes.join(', ');
+                const response = `Catatan Anda: ${allNotes}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Anda tidak memiliki catatan yang disimpan.');
+                output.textContent = 'Tidak ada catatan yang disimpan.';
+            }
+        }
+
+        // Fungsi untuk menghapus catatan dari localStorage
+        function deleteNotes() {
+            localStorage.removeItem('notes');
+            speak('Semua catatan telah dihapus.');
+            output.textContent = 'Semua catatan telah dihapus.';
+        }
+
+        // Fungsi untuk menyimpan jadwal ke localStorage
+        function saveSchedule(schedule) {
+            let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+            schedules.push(schedule);
+            localStorage.setItem('schedules', JSON.stringify(schedules));
+            const response = `Jadwal telah disimpan: ${schedule}.`;
+            speak(response);
+            output.textContent = response;
+        }
+
+        // Fungsi untuk menampilkan semua jadwal dari localStorage
+        function showSchedules() {
+            let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+            if (schedules.length > 0) {
+                const allSchedules = schedules.join(', ');
+                const response = `Jadwal Anda: ${allSchedules}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Anda tidak memiliki jadwal yang disimpan.');
+                output.textContent = 'Tidak ada jadwal yang disimpan.';
+            }
+        }
+
+        // Fungsi untuk menghapus semua jadwal dari localStorage
+        function deleteSchedules() {
+            localStorage.removeItem('schedules');
+            speak('Semua jadwal telah dihapus.');
+            output.textContent = 'Semua jadwal telah dihapus.';
+        }
+
+        // Fungsi untuk melakukan pencarian di Google
+        function searchGoogle(query) {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            window.open(searchUrl, '_blank'); // Membuka pencarian di tab baru
+            speak(`Mencari ${query} di Google.`);
+        }
+        // Fungsi untuk menyimpan alarm ke localStorage dan memberikan nada dering saat alarm berbunyi
+        function setAlarm(minutes) {
+            const now = new Date();
+            const alarmTime = new Date(now.getTime() + minutes * 60000); // Alarm dalam menit
+            let alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+            alarms.push(alarmTime);
+            localStorage.setItem('alarms', JSON.stringify(alarms));
+            const response = `Alarm disetel untuk ${minutes} menit dari sekarang.`;
+            speak(response);
+            output.textContent = response;
+
+            // Timer untuk alarm berbunyi
+            setTimeout(() => {
+                speak('Waktu alarm habis!');
+                output.textContent = 'Alarm berbunyi!';
+                const alarmSound = document.getElementById('alarmSound');
+                alarmSound.play(); // Memutar nada dering
+            }, minutes * 60000); // Mengatur alarm dalam milidetik
+        }
+
+        // Fungsi untuk menampilkan semua alarm dari localStorage
+        function showAlarms() {
+            let alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+            if (alarms.length > 0) {
+                const allAlarms = alarms.map(time => new Date(time).toLocaleTimeString()).join(', ');
+                const response = `Alarm yang disetel: ${allAlarms}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Anda tidak memiliki alarm yang disetel.');
+                output.textContent = 'Tidak ada alarm yang disetel.';
+            }
+        }
+
+        // Fungsi untuk menghapus semua alarm dari localStorage
+        function deleteAlarms() {
+            localStorage.removeItem('alarms');
+            speak('Semua alarm telah dihapus.');
+            output.textContent = 'Semua alarm telah dihapus.';
+        }
+
+        // Fungsi untuk menyimpan pengingat waktu dan hari
+        function saveTimeReminder(reminderText, reminderTime, reminderDay) {
+            let reminders = JSON.parse(localStorage.getItem('timeReminders')) || [];
+            reminders.push({ text: reminderText, time: reminderTime, day: reminderDay });
+            localStorage.setItem('timeReminders', JSON.stringify(reminders));
+            const response = `Pengingat telah disimpan untuk ${reminderDay} jam ${reminderTime}: ${reminderText}.`;
+            speak(response);
+            output.textContent = response;
+        }
+
+        // Fungsi untuk memeriksa dan menjalankan pengingat
+        function checkReminders() {
+            const now = new Date();
+            const currentTime = `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+            const currentDay = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][now.getDay()];
+
+            let reminders = JSON.parse(localStorage.getItem('timeReminders')) || [];
+            reminders.forEach((reminder, index) => {
+                if (reminder.time === currentTime && reminder.day === currentDay) {
+                    speak(`Pengingat: ${reminder.text}`);
+                    output.textContent = `Pengingat: ${reminder.text}`;
+
+                    // Hapus pengingat setelah dijalankan
+                    reminders.splice(index, 1);
+                    localStorage.setItem('timeReminders', JSON.stringify(reminders));
+                }
+            });
+        }
+
+        // Interval untuk memeriksa pengingat setiap menit
+        setInterval(checkReminders, 60000);
+
+        // Fungsi untuk menampilkan semua pengingat waktu dan hari
+        function showReminders() {
+            let reminders = JSON.parse(localStorage.getItem('timeReminders')) || [];
+            if (reminders.length > 0) {
+                const allReminders = reminders.map((reminder, index) => `${index + 1}. ${reminder.text} pada ${reminder.day} jam ${reminder.time}`).join('\n');
+                const response = `Pengingat Anda: \n${allReminders}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Anda tidak memiliki pengingat yang disimpan.');
+                output.textContent = 'Tidak ada pengingat yang disimpan.';
+            }
+        }
+
+        // Fungsi untuk mengedit pengingat
+        function editReminder(index) {
+            let reminders = JSON.parse(localStorage.getItem('timeReminders')) || [];
+            if (index > 0 && index <= reminders.length) {
+                const reminder = reminders[index - 1];
+
+                // Meminta detail baru dari pengguna
+                const newText = prompt(`Ubah teks pengingat dari "${reminder.text}":`) || reminder.text;
+                const newTime = prompt(`Ubah waktu pengingat dari "${reminder.time}" (format HH:MM):`) || reminder.time;
+                const newDay = prompt(`Ubah hari pengingat dari "${reminder.day}":`) || reminder.day;
+
+                // Memperbarui pengingat
+                reminders[index - 1] = { text: newText, time: newTime, day: newDay };
+                localStorage.setItem('timeReminders', JSON.stringify(reminders));
+
+                const response = `Pengingat telah diperbarui: ${newText} pada ${newDay} jam ${newTime}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Nomor pengingat tidak valid.');
+                output.textContent = 'Nomor pengingat tidak valid.';
+            }
+        }
+
+        // Fungsi untuk menghapus pengingat berdasarkan nomor
+        function deleteReminder(index) {
+            let reminders = JSON.parse(localStorage.getItem('timeReminders')) || [];
+            if (index > 0 && index <= reminders.length) {
+                const removed = reminders.splice(index - 1, 1);
+                localStorage.setItem('timeReminders', JSON.stringify(reminders));
+
+                const response = `Pengingat "${removed[0].text}" pada ${removed[0].day} jam ${removed[0].time} telah dihapus.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Nomor pengingat tidak valid.');
+                output.textContent = 'Nomor pengingat tidak valid.';
+            }
+        }
+
+        // Fungsi untuk menghapus semua pengingat
+        function deleteAllReminders() {
+            localStorage.removeItem('timeReminders');
+            speak('Semua pengingat telah dihapus.');
+            output.textContent = 'Semua pengingat telah dihapus.';
+        }
+
+
+        // Fungsi untuk menyimpan data keuangan
+        function saveTransaction(type, amount, description) {
+            let finances = JSON.parse(localStorage.getItem('finances')) || [];
+            const transaction = {
+                type: type,  // 'masuk' atau 'keluar'
+                amount: parseFloat(amount),
+                description: description,
+                date: new Date().toLocaleString() // Tanggal dan waktu transaksi
+            };
+            finances.push(transaction);
+            localStorage.setItem('finances', JSON.stringify(finances));
+            const response = `Transaksi ${type} sebesar Rp${amount} dengan keterangan: ${description} telah disimpan.`;
+            speak(response);
+            output.textContent = response;
+        }
+
+        // Fungsi untuk input uang masuk
+        function inputUangMasuk() {
+            const amount = prompt('Berapa jumlah uang masuk?');
+            const description = prompt('Masukkan keterangan untuk uang masuk:');
+            if (amount && !isNaN(amount)) {
+                saveTransaction('masuk', amount, description);
+            } else {
+                speak('Jumlah tidak valid.');
+            }
+        }
+
+        // Fungsi untuk input uang keluar
+        function inputUangKeluar() {
+            const amount = prompt('Berapa jumlah uang keluar?');
+            const description = prompt('Masukkan keterangan untuk uang keluar:');
+            if (amount && !isNaN(amount)) {
+                saveTransaction('keluar', amount, description);
+            } else {
+                speak('Jumlah tidak valid.');
+            }
+        }
+
+        // Fungsi untuk menghitung sisa uang
+        function getSisaUang() {
+            let finances = JSON.parse(localStorage.getItem('finances')) || [];
+            let totalMasuk = finances.filter(f => f.type === 'masuk').reduce((sum, f) => sum + f.amount, 0);
+            let totalKeluar = finances.filter(f => f.type === 'keluar').reduce((sum, f) => sum + f.amount, 0);
+            let sisaUang = totalMasuk - totalKeluar;
+            const response = `Sisa uang saat ini adalah Rp${sisaUang}.`;
+            speak(response);
+            output.textContent = response;
+        }
+
+        // Fungsi untuk melihat semua transaksi
+        function showTransactions() {
+            let finances = JSON.parse(localStorage.getItem('finances')) || [];
+            if (finances.length > 0) {
+                const allTransactions = finances.map(f => `${f.type} Rp${f.amount}, Keterangan: ${f.description}, Tanggal: ${f.date}`).join(', ');
+                const response = `Transaksi Anda: ${allTransactions}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Anda belum memiliki transaksi.');
+                output.textContent = 'Belum ada transaksi.';
+            }
+        }
+
+        // Fungsi untuk menghapus semua transaksi dari localStorage
+        function deleteAllTransactions() {
+            localStorage.removeItem('finances');
+            speak('Semua transaksi telah dihapus.');
+            output.textContent = 'Semua transaksi telah dihapus.';
+        }
+
+        // Fungsi untuk menyimpan resep masakan
+        function saveRecipe(name, ingredients, steps, category) {
+            let recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+            const recipe = {
+                name: name,
+                ingredients: ingredients,
+                steps: steps,
+                category: category,
+                date: new Date().toLocaleString() // Tanggal dan waktu resep ditambahkan
+            };
+            recipes.push(recipe);
+            localStorage.setItem('recipes', JSON.stringify(recipes));
+            const response = `Resep ${name} telah disimpan.`;
+            speak(response);
+            output.textContent = response;
+        }
+
+        // Fungsi untuk input resep baru
+        function inputRecipe() {
+            const name = prompt('Masukkan nama resep:');
+            const ingredients = prompt('Masukkan bahan-bahan (pisahkan dengan koma):');
+            const steps = prompt('Masukkan langkah-langkah (pisahkan dengan titik koma):');
+            const category = prompt('Masukkan kategori resep (contoh: Makanan Utama, Minuman, Dessert):');
+            if (name && ingredients && steps && category) {
+                saveRecipe(name, ingredients, steps, category);
+            } else {
+                speak('Input resep tidak lengkap.');
+            }
+        }
+
+        // Fungsi untuk melihat semua resep
+        function showAllRecipes() {
+            let recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+            if (recipes.length > 0) {
+                const allRecipes = recipes.map(r => `Resep: ${r.name}, Kategori: ${r.category}, Bahan: ${r.ingredients}, Langkah-langkah: ${r.steps}`).join('. ');
+                const response = `Resep-resep Anda: ${allRecipes}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak('Anda belum memiliki resep yang disimpan.');
+                output.textContent = 'Belum ada resep yang disimpan.';
+            }
+        }
+
+        // Fungsi untuk melihat resep berdasarkan kategori
+        function showRecipesByCategory(category) {
+            let recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+            let filteredRecipes = recipes.filter(r => r.category.toLowerCase() === category.toLowerCase());
+            if (filteredRecipes.length > 0) {
+                const categoryRecipes = filteredRecipes.map(r => `Resep: ${r.name}, Bahan: ${r.ingredients}, Langkah-langkah: ${r.steps}`).join('. ');
+                const response = `Resep dalam kategori ${category}: ${categoryRecipes}.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak(`Tidak ada resep dalam kategori ${category}.`);
+                output.textContent = `Tidak ada resep dalam kategori ${category}.`;
+            }
+        }
+
+        // Fungsi untuk menghapus resep berdasarkan nama
+        function deleteRecipeByName(recipeName) {
+            let recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+            const index = recipes.findIndex(r => r.name.toLowerCase() === recipeName.toLowerCase());
+
+            if (index !== -1) {
+                recipes.splice(index, 1); // Hapus resep dari array
+                localStorage.setItem('recipes', JSON.stringify(recipes)); // Simpan kembali tanpa resep yang dihapus
+                const response = `Resep ${recipeName} telah dihapus.`;
+                speak(response);
+                output.textContent = response;
+            } else {
+                speak(`Resep ${recipeName} tidak ditemukan.`);
+                output.textContent = `Resep ${recipeName} tidak ditemukan.`;
+            }
+        }
+
+        // Fungsi untuk menghapus semua resep dari localStorage
+        function deleteAllRecipes() {
+            localStorage.removeItem('recipes');
+            speak('Semua resep telah dihapus.');
+            output.textContent = 'Semua resep telah dihapus.';
+        }
+
+        // Fungsi untuk memutar lagu di YouTube berdasarkan judul
+        function playSongOnYouTube(songTitle) {
+            const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(songTitle)}`;
+            speak(`Mencari dan memutar lagu ${songTitle} di YouTube.`);
+            output.textContent = `Mencari dan memutar lagu ${songTitle}...`;
+            window.open(searchUrl, '_blank'); // Membuka pencarian YouTube di tab baru
+        }
+
+
+
+        // Fungsi untuk menelepon melalui WhatsApp berdasarkan nomor telepon
+        function callViaWhatsApp(phoneNumber) {
+            const waUrl = `https://wa.me/${phoneNumber}`;
+            speak(`Menghubungi nomor ${phoneNumber} melalui WhatsApp.`);
+            output.textContent = `Menghubungi nomor ${phoneNumber}...`;
+            window.open(waUrl, '_blank'); // Membuka WhatsApp dengan nomor yang dituju
+        }
+
+        // Fungsi untuk menyimpan kontak ke dalam localStorage
+        function saveContact(name, phoneNumber) {
+            let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+            const contact = { name: name.toLowerCase(), phoneNumber: phoneNumber };
+            contacts.push(contact);
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            speak(`Kontak ${name} telah disimpan dengan nomor ${phoneNumber}.`);
+            output.textContent = `Kontak ${name} telah disimpan.`;
+        }
+
+        // Fungsi untuk mencari nomor telepon berdasarkan nama
+        function findContactByName(name) {
+            let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+            const contact = contacts.find(c => c.name === name.toLowerCase());
+            if (contact) {
+                return contact.phoneNumber;
+            } else {
+                speak(`Kontak dengan nama ${name} tidak ditemukan.`);
+                output.textContent = `Kontak ${name} tidak ditemukan.`;
+                return null;
+            }
+        }
+
+        // Fungsi untuk mengedit nomor telepon berdasarkan nama
+        function editContactPhoneNumber(name, newPhoneNumber) {
+            let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+            const index = contacts.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
+
+            if (index !== -1) {
+                contacts[index].phoneNumber = newPhoneNumber; // Update nomor telepon
+                localStorage.setItem('contacts', JSON.stringify(contacts)); // Simpan perubahan
+                speak(`Nomor telepon untuk kontak ${name} telah diubah menjadi ${newPhoneNumber}.`);
+                output.textContent = `Nomor telepon ${name} telah diubah.`;
+            } else {
+                speak(`Kontak dengan nama ${name} tidak ditemukan. Pastikan nama sudah benar.`);
+                output.textContent = `Kontak ${name} tidak ditemukan.`;
+            }
+        }
+
+        // Fungsi untuk mengedit nomor telepon berdasarkan nama
+        function editContactPhoneNumber(name, newPhoneNumber) {
+            let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+            const index = contacts.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
+
+            if (index !== -1) {
+                contacts[index].phoneNumber = newPhoneNumber; // Update nomor telepon
+                localStorage.setItem('contacts', JSON.stringify(contacts)); // Simpan perubahan
+                speak(`Nomor telepon untuk kontak ${name} telah diubah menjadi ${newPhoneNumber}.`);
+                output.textContent = `Nomor telepon ${name} telah diubah.`;
+            } else {
+                speak(`Kontak dengan nama ${name} tidak ditemukan. Pastikan nama sudah benar.`);
+                output.textContent = `Kontak ${name} tidak ditemukan.`;
+            }
+        }
+
+
+        // Fungsi untuk mengirim pesan melalui WhatsApp
+        function sendMessageViaWhatsApp(phoneNumber, message) {
+            const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            speak(`Mengirim pesan ke nomor ${phoneNumber} melalui WhatsApp.`);
+            output.textContent = `Mengirim pesan ke ${phoneNumber}...`;
+            window.open(waUrl, '_blank'); // Membuka WhatsApp Web atau WhatsApp di perangkat seluler
+        }
+
+        // Fungsi untuk mengirim pesan setelah mendapatkan nama dan nomor telepon
+        function sendWhatsAppMessage() {
+            const contactName = prompt('Masukkan nama kontak yang ingin dikirimi pesan:');
+            const phoneNumber = findContactByName(contactName);
+
+            if (phoneNumber) {
+                recognition.onresult = (event) => {
+                    const transcript = event.results[event.resultIndex][0].transcript;
+                    const message = transcript.toLowerCase();
+                    output.textContent = `Pesan: ${message}`;
+
+                    // Kirim pesan via WhatsApp
+                    sendMessageViaWhatsApp(phoneNumber, message);
+                };
+
+                speak(`Apa pesan yang ingin kamu kirimkan ke ${contactName}? Silakan bicara.`);
+                recognition.start(); // Mulai pengenalan suara untuk menangkap isi pesan
+            } else {
+                speak(`Kontak dengan nama ${contactName} tidak ditemukan.`);
+                output.textContent = `Kontak ${contactName} tidak ditemukan.`;
+            }
+        }
+
+        // Fungsi untuk membuka Google Translate dan menerjemahkan teks ke bahasa yang disebutkan
+        function translateText(text, targetLang) {
+            if (!text) {
+                speak('Tolong sebutkan teks yang ingin diterjemahkan.');
+                output.textContent = 'Tidak ada teks yang disebutkan.';
+                return;
+            }
+
+            const sourceLang = 'auto'; // Biarkan Google Translate mendeteksi bahasa sumber otomatis
+            const translateUrl = `https://translate.google.co.id/?sl=${sourceLang}&tl=${targetLang}&text=${encodeURIComponent(text)}&op=translate`;
+            speak(`Menerjemahkan teks "${text}" ke ${targetLang}.`);
+            output.textContent = `Menerjemahkan teks: "${text}"...`;
+            window.open(translateUrl, '_blank'); // Membuka Google Translate di tab baru
+        }
+
+        // Fungsi untuk membuka Google News dan menampilkan berita terkini
+        function showLatestNews() {
+            const newsUrl = 'https://news.google.com/topstories?hl=id&gl=ID&ceid=ID:id'; // URL berita terkini untuk wilayah Indonesia
+            speak('Menampilkan berita terkini.');
+            output.textContent = 'Membuka berita terkini...';
+            window.open(newsUrl, '_blank'); // Membuka Google News di tab baru
+        }
+
+        // Daftar bahasa yang didukung dengan kode ISO 639-1
+        const languages = {
+            "indonesia": "id",
+            "inggris": "en",
+            "prancis": "fr",
+            "jerman": "de",
+            "spanyol": "es",
+            "jepang": "ja",
+            "korea": "ko",
+            "cina": "zh-CN",
+            "arab": "ar",
+            "mandarin": "zh",
+            "italia": "it",
+            "rusia": "ru",
+            "portugis": "pt",
+            "hindi": "hi",
+            "thai": "th",
+            "vietnam": "vi",
+            "turki": "tr",
+            "belanda": "nl",
+            "swedia": "sv",
+            "yunani": "el",
+            "polandia": "pl",
+            "ukraina": "uk",
+
+        };
+
+        // Fungsi untuk mengidentifikasi bahasa berdasarkan input pengguna
+        function detectLanguage(input) {
+            for (let [language, code] of Object.entries(languages)) {
+                if (input.toLowerCase().includes(language)) {
+                    return code;
+                }
+            }
+            return null; // Jika bahasa tidak ditemukan
+        }
+
+        // Fungsi untuk membuka Google Maps dan mencari lokasi berdasarkan input pengguna
+        function searchLocationOnGoogleMaps(location) {
+            if (!location) {
+                speak('Tolong sebutkan lokasi yang ingin dicari.');
+                output.textContent = 'Tidak ada lokasi yang disebutkan.';
+                return;
+            }
+
+            const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(location)}`;
+            speak(`Mencari lokasi ${location} di Google Maps.`);
+            output.textContent = `Mencari lokasi: "${location}"...`;
+            window.open(mapsUrl, '_blank'); // Membuka Google Maps di tab baru dengan pencarian lokasi
+        }
+
+        // Mulai mendengarkan saat tombol ditekan
+        micBtn.addEventListener('click', () => {
+            recognition.start();
+            output.textContent = 'Edy siap mendengarkan...';
+        });
+
+        // Ketika asisten mendapatkan hasil
+        recognition.onresult = (event) => {
+            const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
+            output.textContent = `Anda berkata: "${transcript}"`;
+
+            // Periksa jika nama "Edy" dipanggil
+            if (transcript.includes('edi')) {
+                speak('Iya sayangku, ada yang bisa edy bantu?');
+                output.textContent = 'Edy mendengarkan...';
+
+                // Mendengarkan perintah berikutnya
+                recognition.onresult = (event) => {
+                    const command = event.results[event.resultIndex][0].transcript.toLowerCase();
+                    const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
+                    output.textContent = `Anda berkata: "${command}"`;
+                    console.log(`Transcript ditangkap: "${transcript}"`);  // Debugging: Lihat apa yang ditangkap oleh pengenalan suara
+                    output.textContent = `Anda berkata: "${transcript}"`;
+
+
+                    // Respon terhadap perintah setelah nama dipanggil
+                    if (command.includes('buka aplikasi satu')) {
+                        openNumberedApp('satu'); // Membuka Input Divan
+                    } else if (command.includes('kamu sudah makan')) {
+                        hasEaten(); // Perintah soal makan
+                    } else if (command.includes('jam berapa sekarang')) {
+                        getTimeNow(); // Perintah untuk waktu sekarang
+                    } else if (command.includes('ini hari apa')) {
+                        getDayToday(); // Perintah untuk mengetahui hari ini
+                    } else if (command.includes('i love you')) {
+                        respondLove(); // Respon untuk "I love you"
+                    } else if (command.includes('aku cantik nggak')) {
+                        askIfBeautiful(); // Respon untuk "Aku cantik nggak"
+                    } else if (command.includes('aku ganteng nggak')) {
+                        askIfHandsome(); // Respon untuk "Aku ganteng nggak"
+                    } else if (command.includes('buka maps')) {
+                        openApp('maps'); // Membuka Mps         
+                    } else if (command.includes('buka kain')) {
+                        openApp('kain'); // Membuka input divan 
+                    } else if (command.includes('kirim pesan')) {
+                        sendWhatsAppMessage(); // Mengirim Pesan Melalui WhatsApp        
+                    } else if (command.includes('buka whatsapp')) {
+                        openApp('whatsapp'); // Membuka WhatsApp
+                    } else if (command.includes('buka instagram')) {
+                        openApp('instagram'); // Membuka Instagram
+                    } else if (command.includes('buka facebook')) {
+                        openApp('facebook'); // Membuka Facebook
+                    } else if (command.includes('cuaca hari ini')) {
+                        weatherToday(); // Menampilkan cuaca hari ini
+                    } else if (transcript.includes("rute jalan ke")) {
+                        const destination = transcript.replace("rute jalan ke", "").trim();
+                        getRoute(destination); // Memanggil fungsi rute jalan
+                    } else if (command.includes('atur timer')) {
+                        const minutes = parseInt(prompt('Berapa menit timer?'));
+                        if (!isNaN(minutes)) {
+                            setTimer(minutes); // Mengatur timer
+                        } else {
+                            speak('Waktu tidak valid.');
+                            output.textContent = 'Waktu tidak valid.';
+                        }
+                    } else if (command.includes('buka tamu diundang perempuan')) {
+                        speak('Membuka Tamu Diundang Perempuan.');
+                        output.textContent = 'Membuka Tamu Diundang Perempuan...';
+                        window.open('https://cindy-edy.github.io/Data/Diundang.html', '_blank');
+                    } else if (command.includes('buka tamu diundang laki')) {
+                        speak('Membuka Tamu Diundang Laki laki.');
+                        output.textContent = 'Membuka Tamu Diundang Laki laki...';
+                        window.open('https://cindy-edy.github.io/Data/Diundang1.html', '_blank');
+                    } else if (command.includes('buka tamu undangan')) {
+                        speak('Membuka Buku Tamu Undangan.');
+                        output.textContent = 'Membuka Buku Tamu Undangan...';
+                        window.open('https://cindy-edy.github.io/Data/buku-tamu/book.html', '_blank');
+                    } else if (command.includes('buka google')) {
+                        speak('Membuka Google.');
+                        output.textContent = 'Membuka Google...';
+                        window.open('https://www.google.com', '_blank');
+                    } else if (command.includes('buka youtube')) {
+                        speak('Membuka YouTube.');
+                        output.textContent = 'Membuka YouTube...';
+                        window.open('https://www.youtube.com', '_blank');
+                    } else if (command.includes('buka happy birthday')) {
+                        speak('Membuka Happy Birthday.');
+                        output.textContent = 'Membuka Happy Birthday...';
+                        window.open('https://cindy-edy.github.io/Aplikasih/', '_blank');
+                    } else if (command.includes('buka caku')) {
+                        speak('Membuka Caku.');
+                        output.textContent = 'Membuka Caku...';
+                        window.open('https://cindy-edy.github.io/Data/CAKU.html', '_blank');
+                    } else if (command.includes('buka buku undangan kami')) {
+                        speak('Membuka Buku Tamu Undangan Kami.');
+                        output.textContent = 'Membuka Buku Tamu Undangan Kami...';
+                        window.open('https://cindy-edy.github.io/Data/buku-tamu.html', '_blank');
+                    } else if (command.includes('buka buku undangan kita')) {
+                        speak('Membuka Buku Tamu Undangan Kita.');
+                        output.textContent = 'Membuka Buku Tamu Undangan Kita...';
+                        window.open('https://cindy-edy.github.io/Data/buku-tamu2.html', '_blank');
+                    } else if (command.includes('buka notes')) {
+                        speak('Membuka Notes.');
+                        output.textContent = 'Membuka Notes...';
+                        window.open('https://script.google.com/macros/s/AKfycbxYi7oFcSmlFVeElfueha9ktzO1Om9lc23Ch4To1boA5AtIqHOWOudwJXtSdGqrFZQ4/exec', '_blank');
+                    } else if (command.includes('buka chat')) {
+                        speak('Membuka Chat.');
+                        output.textContent = 'Membuka Chat...';
+                        window.open('https://cindy-edy.github.io/Data/chat.html', '_blank');
+                    } else if (command.includes('buka data track')) {
+                        speak('Membuka Data Track.');
+                        output.textContent = 'Membuka Data Track...';
+                        window.open('https://cindy-edy.github.io/Data/maps-track.html', '_blank');
+                    } else if (command.includes('kirim lokasi')) {
+                        speak('Membuka Kirim lokasi.');
+                        output.textContent = 'Membuka Kirim Lokasi...';
+                        window.open('https://cindy-edy.github.io/Data/track.html', '_blank');
+                    } else if (command.includes('fakta menarik')) {
+                        speak('Tahukah kamu? Otak manusia lebih aktif saat tidur daripada saat menonton TV.');
+                        output.textContent = 'Tahukah kamu? Otak manusia lebih aktif saat tidur daripada saat menonton TV.';
+                    } else if (command.includes('cinta')) {
+                        speak('Cinta itu rumit, tapi indah. Apa ada yang ingin kamu ceritakan?');
+                        output.textContent = 'Cinta itu rumit, tapi indah. Apa ada yang ingin kamu ceritakan?';
+                    } else if (command.includes('terimakasih edi')) {
+                        speak('Terimakasih Kembali.');
+                        output.textContent = 'Terimakasih Kembali';
+                    } else if (command.includes('kamu sedang apa')) {
+                        speak('Edy sedang menunggu kamu.');
+                        output.textContent = 'Edy sedang menunggu kamu';
+                    } else if (command.includes('selamat pagi edi')) {
+                        speak('Selamat pagi juga sayangku, semangat sayangku.');
+                        output.textContent = 'Selamat pagi juga sayangku, semangat sayangku.';
+                    } else if (command.includes('selamat siang edi')) {
+                        speak('Selamat siang juga sayangku, Jangan telat makan siang ya sayangku.');
+                        output.textContent = 'Selamat siang juga sayangku, Jangan telat makan siang ya sayangku.';
+                    } else if (command.includes('selamat sore edi')) {
+                        speak('Selamat sore juga sayangku, Selamat beristirahat sayangku, dari lelahnya bekerja.');
+                        output.textContent = 'Selamat sore juga sayangku, Selamat beristirahat sayangku, dari lelahnya bekerja.';
+                    } else if (command.includes('selamat malam edi')) {
+                        speak('Selamat malam juga sayangku, semoga mimpi indah ya.');
+                        output.textContent = 'Selamat siang juga sayangku, semoga mimpi indah ya.';
+                    } else if (command.includes('berpantun')) {
+                        speak('Makan pisang di dekat palang, Lihat kucing main di taman. Kamu bilang jomblo itu tenang, Tapi malam nangis kedinginan..');
+                        output.textContent = 'Makan pisang di dekat palang, Lihat kucing main di taman. Kamu bilang jomblo itu tenang, Tapi malam nangis kedinginan..';
+                    } else if (command.includes('puisi')) {
+                        speak('Jejak Senyum di Senja, Senja tiba menyelimuti hari, Langit jingga, angin menari. Canda riang anak berlari, Seperti mimpi yang terus berarti. lalu kulihat senyum tersembunyi, Melepas resah, lelah sendiri. Di antara waktu yang berbisik lirih, Ada cerita yang tak pernah letih. Matahari pamit di ufuk sana, Meninggalkan hangat yang masih terasa. Esok kita jumpa di pagi yang baru, Menyusun harapan, tak pernah jemu..');
+                        output.textContent = 'Jejak Senyum di Senja, Senja tiba menyelimuti hari, Langit jingga, angin menari. Canda riang anak berlari, Seperti mimpi yang terus berarti. Lalu kulihat senyum tersembunyi, Melepas resah, lelah sendiri. Di antara waktu yang berbisik lirih, Ada cerita yang tak pernah letih. Matahari pamit di ufuk sana, Meninggalkan hangat yang masih terasa. Esok kita jumpa di pagi yang baru, Menyusun harapan, tak pernah jemu..';
+                    } else if (command.includes('bercerita dulu')) {
+                        speak('Cinta, sebuah perasaan yang begitu mendalam dan penuh warna. Itu adalah kekuatan yang mampu mengubah dunia seseorang, dari gelap menjadi terang, dari biasa menjadi luar biasa. Ia datang tanpa diundang, mengisi hati dengan debaran yang sering kali sulit dijelaskan. Cinta bisa tumbuh dari hal - hal kecil, seperti senyuman yang tulus, perhatian sederhana, atau saat - saat yang tidak terduga.Ia tak selalu sempurna; kadang ia membuatmu tertawa, kadang juga membuatmu menangis.Namun, itulah keajaiban cinta.Ia mampu menguatkan meski terkadang menyakitkan.  Ada cinta yang terwujud dalam pengorbanan diam - diam, seperti seorang ibu yang rela terjaga sepanjang malam untuk anaknya.Ada juga cinta yang penuh semangat, seperti sepasang kekasih yang berjanji untuk terus bersama, melewati segala suka dan duka. Cinta mengajarkan kita banyak hal—kesabaran, keikhlasan, dan keberanian untuk melangkah bersama meskipun dunia terasa tak selalu berpihak.Ia bukan sekadar kata, melainkan rasa yang membuat hidup lebih berwarna, bahkan dalam kesederhanaan. Ah, cinta... selalu ada kisah tak berujung yang bisa diceritakan, dan mungkin, kamu sendiri sedang menuliskan kisah cintamu hari ini.');
+                        output.textContent = 'Cinta, sebuah perasaan yang begitu mendalam dan penuh warna. Itu adalah kekuatan yang mampu mengubah dunia seseorang, dari gelap menjadi terang, dari biasa menjadi luar biasa. Ia datang tanpa diundang, mengisi hati dengan debaran yang sering kali sulit dijelaskan. Cinta bisa tumbuh dari hal - hal kecil, seperti senyuman yang tulus, perhatian sederhana, atau saat - saat yang tidak terduga.Ia tak selalu sempurna; kadang ia membuatmu tertawa, kadang juga membuatmu menangis.Namun, itulah keajaiban cinta.Ia mampu menguatkan meski terkadang menyakitkan.  Ada cinta yang terwujud dalam pengorbanan diam - diam, seperti seorang ibu yang rela terjaga sepanjang malam untuk anaknya.Ada juga cinta yang penuh semangat, seperti sepasang kekasih yang berjanji untuk terus bersama, melewati segala suka dan duka. Cinta mengajarkan kita banyak hal—kesabaran, keikhlasan, dan keberanian untuk melangkah bersama meskipun dunia terasa tak selalu berpihak.Ia bukan sekadar kata, melainkan rasa yang membuat hidup lebih berwarna, bahkan dalam kesederhanaan. Ah, cinta... selalu ada kisah tak berujung yang bisa diceritakan, dan mungkin, kamu sendiri sedang menuliskan kisah cintamu hari ini.';
+                    } else if (command.includes('siapa yang menciptakan kamu')) {
+                        speak('Edy diciptakan oleh cindy.');
+                        output.textContent = 'Edy diciptakan oleh cindy.';
+                    } else if (command.includes('kapan ulang tahun kami')) {
+                        speak('Cindy ulang tahun pada tanggal 22 october dan Edy ulang tahun pada tanggal 18 november.');
+                        output.textContent = 'Cindy ulang tahun pada tanggal 22 october dan Edy ulang tahun pada tanggal 18 november.';
+                    } else if (command.includes('kapan tanggal jadian kita')) {
+                        speak('Kita jadian pada tanggal 2 agustus 2023.');
+                        output.textContent = 'Kita jadian pada tanggal 2 agustus 2023.';
+                    } else if (command.includes('tempat tinggal kamu')) {
+                        speak('edy tinggal di dalam lubuk hati kamu sayangku.');
+                        output.textContent = 'edy tinggal di dalam lubuk hati kamu sayangku.';
+                    } else if (command.includes('siapa presiden indonesia')) {
+                        speak('Presiden Indonesia saat ini adalah Prabowo Subianto.'); // Menyebutkan presiden
+                    } else if (command.includes('hitungan dari')) {
+                        const expression = command.replace('hitungan dari ', '').trim();
+                        const result = calculateMath(expression);
+                        speak(result);
+                        output.textContent = result;
+
+                    } else if (command.includes('input uang masuk')) {
+                        inputUangMasuk();
+                    } else if (command.includes('input uang keluar')) {
+                        inputUangKeluar();
+                    } else if (command.includes('berapa sisa uang')) {
+                        getSisaUang();
+                    } else if (command.includes('lihat transaksi')) {
+                        showTransactions();
+                    } else if (command.includes('hapus semua transaksi')) {
+                        deleteAllTransactions();
+
+                    } else if (command.includes('tambah resep')) {
+                        inputRecipe();
+                    } else if (command.includes('lihat resep')) {
+                        showAllRecipes();
+                    } else if (command.includes('kategori resep')) {
+                        const category = prompt('Masukkan kategori resep yang ingin dilihat:');
+                        showRecipesByCategory(category);
+                    } else if (command.includes('hapus resep')) {
+                        const recipeName = prompt('Masukkan nama resep yang ingin dihapus:');
+                        deleteRecipeByName(recipeName);
+                    } else if (command.includes('hapus semua resep')) {
+                        deleteAllRecipes();
+
+                    } else if (command.includes('buat catatan')) {
+                        const note = command.replace('buat catatan ', '').trim();
+                        saveNote(note);
+                    } else if (command.includes('lihat catatan')) {
+                        showNotes();
+                    } else if (command.includes('hapus catatan')) {
+                        deleteNotes();
+
+                    } else if (command.includes('buat jadwal')) {
+                        const schedule = command.replace('buat jadwal ', '').trim();
+                        saveSchedule(schedule);
+                    } else if (command.includes('lihat jadwal')) {
+                        showSchedules();
+                    } else if (command.includes('hapus jadwal')) {
+                        deleteSchedules();
+
+                    } else if (transcript.includes('telusuri')) {
+                        const searchQuery = transcript.replace('telusuri', '').trim();
+                        if (searchQuery) {
+                            searchGoogle(searchQuery);
+                        } else {
+                            speak('Tolong sebutkan apa yang ingin dicari di Google.');
+                        }
+
+                    } else if (command.includes('buat pengingat waktu')) {
+                        const reminderText = prompt('Apa yang ingin diingatkan?');
+                        const reminderTime = prompt('Masukkan waktu pengingat (format: HH:MM)');
+                        const reminderDay = prompt('Masukkan hari pengingat (contoh: Senin, Selasa, etc.)');
+                        if (reminderText && reminderTime && reminderDay) {
+                            saveTimeReminder(reminderText, reminderTime, reminderDay);
+                        } else {
+                            speak('Informasi pengingat tidak lengkap.');
+                        }
+                    } else if (command.includes('lihat pengingat')) {
+                        showReminders();
+                    } else if (command.includes('edit pengingat')) {
+                        const index = parseInt(prompt('Masukkan nomor pengingat yang ingin diubah:'));
+                        if (!isNaN(index)) {
+                            editReminder(index);
+                        } else {
+                            speak('Nomor pengingat tidak valid.');
+                        }
+                    } else if (command.includes('hapus pengingat')) {
+                        const index = parseInt(prompt('Masukkan nomor pengingat yang ingin dihapus (atau kosongkan untuk menghapus semua pengingat):'));
+                        if (!isNaN(index)) {
+                            deleteReminder(index);
+                        } else {
+                            deleteAllReminders();
+                        }
+
+                    } else if (command.includes('lihat alarm')) {
+                        showAlarms();
+                    } else if (command.includes('hapus alarm')) {
+                        deleteAlarms();
+                    } else if (command.includes('set alarm')) {
+                        const minutes = parseInt(prompt('Berapa menit alarm?'));
+                        if (!isNaN(minutes)) {
+                            setAlarm(minutes);
+                        } else {
+                            speak('Waktu tidak valid.');
+                        }
+                    } else if (command.includes('putar lagu')) {
+                        const songTitle = command.replace('putar lagu', '').trim(); // Mengambil judul lagu
+                        if (songTitle) {
+                            playSongOnYouTube(songTitle);
+                        } else {
+                            speak('Tolong sebutkan judul lagu yang ingin diputar.');
+                            output.textContent = 'Tidak ada judul lagu yang disebutkan.';
+                        }
+
+                    } else if (command.includes('telepon')) {
+                        const contactName = command.replace('telepon', '').trim(); // Mengambil nama kontak
+                        const phoneNumber = findContactByName(contactName);
+                        if (phoneNumber) {
+                            callViaWhatsApp(phoneNumber);
+                        }
+                    } else if (command.includes('simpan kontak')) {
+                        const name = prompt('Masukkan nama kontak:');
+                        const phoneNumber = prompt('Masukkan nomor telepon:');
+                        if (name && phoneNumber) {
+                            saveContact(name, phoneNumber);
+                        } else {
+                            speak('Nama atau nomor telepon tidak valid.');
+                        }
+                    } else if (command.includes('edit nomor telepon')) {
+                        const name = prompt('Masukkan nama kontak yang ingin diubah:');
+                        const newPhoneNumber = prompt('Masukkan nomor telepon baru:');
+                        if (name && newPhoneNumber) {
+                            editContactPhoneNumber(name, newPhoneNumber);
+                        } else {
+                            speak('Nama atau nomor telepon tidak valid.');
+                        }
+
+                    } else if (command.includes('hapus kontak')) {
+                        const name = prompt('Masukkan nama kontak yang ingin dihapus:');
+                        if (name) {
+                            deleteContactByName(name);
+                        } else {
+                            speak('Nama kontak tidak valid.');
+                        }
+
+                    } else if (command.includes('terjemahkan ke')) {
+                        const targetLangInput = command.replace('terjemahkan ke', '').trim(); // Ambil bahasa target dari perintah
+                        const targetLangCode = detectLanguage(targetLangInput); // Deteksi bahasa target
+
+                        if (targetLangCode) {
+                            const textToTranslate = prompt('Masukkan teks yang ingin diterjemahkan:');
+                            if (textToTranslate) {
+                                translateText(textToTranslate, targetLangCode);
+                            } else {
+                                speak('Tidak ada teks yang dimasukkan untuk diterjemahkan.');
+                            }
+                        } else {
+                            speak('Bahasa tidak dikenali. Silakan coba lagi dengan bahasa lain.');
+                            output.textContent = 'Bahasa tidak dikenali.';
+                        }
+
+                    } else if (command.includes('berita terkini')) {
+                        showLatestNews(); // Menampilkan berita terbaru di Google News
+
+                    } else if (command.includes('carikan lokasi')) {
+                        const location = command.replace('cari lokasi', '').trim(); // Ambil nama lokasi dari perintah
+                        if (location) {
+                            searchLocationOnGoogleMaps(location); // Mencari lokasi di Google Maps
+                        } else {
+                            speak('Tolong sebutkan lokasi yang ingin dicari.');
+                        }
+
+                    } else {
+                        speak('Perintah tidak dikenali. Coba lagi.');
+                        output.textContent = 'Perintah tidak dikenali. Coba lagi.';
+                    }
+                };
+            } else {
+                speak('Nama Edy tidak disebutkan, coba lagi.');
+                output.textContent = 'Nama Edy tidak disebutkan. Terus mendengarkan...';
+            }
+        };
+        // Kesalahan saat mengenali suara
+        recognition.onerror = (event) => {
+            output.textContent = 'Terjadi kesalahan, coba lagi.';
+            speak('Maaf, terjadi kesalahan.');
+        };
+
+        // Mendengarkan terus tanpa henti
+        recognition.onend = () => {
+            recognition.start(); // Mulai mendengarkan lagi setelah selesai
+        };
+
+    </script>
+</body>
+
+</html>
