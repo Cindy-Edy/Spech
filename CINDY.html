@@ -11,7 +11,7 @@
             background-color: #f3f4f6;
             text-align: center;
             padding: 40px;
-            background-image: url('https://i.gifer.com/origin/dc/dc412623146610157eb73e727f4d16bc_w200.gif');
+            background-image: url('./w.gif');
             background-position: center;
             background-size: cover;
             display: flex;
@@ -29,7 +29,7 @@
             padding: 20px;
             backdrop-filter: blur(10px);
             margin: auto;
-            background-image: url('https://i.pinimg.com/originals/ae/d1/1d/aed11d6975231b91c8e992c02b8376da.gif');
+            background-image: url('./q.gif');
             background-position: center;
             background-size: cover;
         }
@@ -81,7 +81,7 @@
         <p class="output" id="output"> Tekan tombol untuk mulai bicara...</p>
 
         <!--Elemen audio untuk alarm-->
-        <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
+        <audio id="alarmSound" src="./alarm.mp3" preload="auto"></audio>
 
     </div>
 
@@ -124,7 +124,7 @@
             // Hidupkan kembali pengenalan suara setelah TTS selesai
             speech.onend = function () {
                 resumeRecognition();
-            speech.onend = callback || function() {};
+                speech.onend = callback || function () { };
             };
         }
 
@@ -174,6 +174,9 @@
                     break;
                 case 'kain':
                     url = 'https://supergames19.github.io/supergames/input/';
+                    break;
+                case 'google drive':
+                    url = 'https://drive.google.com/my-drive';
                     break;
                 default:
                     speak('Aplikasi tidak ditemukan.');
@@ -353,6 +356,7 @@
             window.open(searchUrl, '_blank'); // Membuka pencarian di tab baru
             speak(`Mencari ${query} di Google.`);
         }
+
         // Fungsi untuk menyimpan alarm ke localStorage dan memberikan nada dering saat alarm berbunyi
         function setAlarm(minutes) {
             const now = new Date();
@@ -820,6 +824,358 @@
             window.open(mapsUrl, '_blank'); // Membuka Google Maps di tab baru dengan pencarian lokasi
         }
 
+        // Fungsi untuk membuka Google Cuaca
+        function openGoogleWeather(city) {
+            const weatherUrl = `https://www.google.com/search?q=cuaca+${encodeURIComponent(city)}`;
+            speak(`Menampilkan cuaca di ${city} melalui Google.`);
+            output.textContent = `Membuka cuaca di ${city}...`;
+            window.open(weatherUrl, '_blank'); // Membuka Google Cuaca di tab baru
+        }
+
+        // Fungsi untuk membuka Google dan menampilkan hasil perhitungan
+        function calculateWithGoogle(expression) {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(expression)}`;
+            speak(`Menghitung ${expression} menggunakan Google.`);
+            output.textContent = `Menghitung ${expression}...`;
+            window.open(searchUrl, '_blank'); // Membuka Google di tab baru dengan pencarian perhitungan
+        }
+
+        // Fungsi untuk membuka Google Zodiak
+        function openGoogleZodiac(zodiacSign) {
+            const zodiacUrl = `https://www.google.com/search?q=zodiak+${encodeURIComponent(zodiacSign)}`;
+            speak(`Menampilkan zodiak ${zodiacSign} melalui Google.`);
+            output.textContent = `Membuka zodiak ${zodiacSign}...`;
+            window.open(zodiacUrl, '_blank'); // Membuka Google Zodiak di tab baru
+        }
+
+        // Fungsi untuk melakukan pencarian di Google
+        function searchGooglee(query) {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            window.open(searchUrl, '_blank'); // Membuka pencarian di tab baru
+            speak(`Mencari ${query} di Google.`);
+        }
+
+        // Fungsi untuk mencari resep di Cookpad
+        function searchRecipeOnCookpad(recipe) {
+            const cookpadUrl = `https://cookpad.com/id/cari/${encodeURIComponent(recipe)}`;
+            speak(`Mencari resep ${recipe} melalui Cookpad.`);
+            output.textContent = `Mencari resep ${recipe} di Cookpad...`;
+            window.open(cookpadUrl, '_blank'); // Membuka Cookpad di tab baru dengan pencarian resep
+        }
+        // Fungsi untuk membuka Google Kalender
+        function openGoogleCalendar() {
+            const calendarUrl = 'https://calendar.google.com/';
+            speak('Membuka Google Kalender.');
+            output.textContent = 'Membuka kalender...';
+            window.open(calendarUrl, '_blank'); // Membuka Google Kalender di tab baru
+        }
+
+        // Fungsi untuk mencari buku di Google
+        function searchBook(bookTitle) {
+            const bookUrl = `https://www.google.com/search?q=buku+${encodeURIComponent(bookTitle)}`;
+            speak(`Mencari buku ${bookTitle} melalui Google.`);
+            output.textContent = `Mencari buku ${bookTitle}...`;
+            window.open(bookUrl, '_blank'); // Membuka pencarian buku di Google
+        }
+
+        // Fungsi untuk mencari kurs mata uang di Google
+        function searchCurrencyExchange(currencyPair) {
+            const currencyUrl = `https://www.google.com/search?q=kurs+${encodeURIComponent(currencyPair)}`;
+            speak(`Mencari kurs mata uang ${currencyPair} melalui Google.`);
+            output.textContent = `Mencari kurs ${currencyPair}...`;
+            window.open(currencyUrl, '_blank'); // Membuka pencarian kurs mata uang di Google
+        }
+
+        // Fungsi untuk membuka prakiraan cuaca besok di Google
+        function searchWeatherTomorrow(city) {
+            const weatherUrl = `https://www.google.com/search?q=prakiraan+cuaca+besok+di+${encodeURIComponent(city)}`;
+            speak(`Mencari prakiraan cuaca besok di ${city} melalui Google.`);
+            output.textContent = `Membuka prakiraan cuaca besok di ${city}...`;
+            window.open(weatherUrl, '_blank'); // Membuka prakiraan cuaca besok di Google
+        }
+
+        // Fungsi untuk membuka situs tes kecepatan internet
+        function checkInternetSpeed() {
+            const speedTestUrl = 'https://fast.com';
+            speak('Membuka situs pengujian kecepatan internet.');
+            output.textContent = 'Membuka Fast.com untuk menguji kecepatan internet...';
+            window.open(speedTestUrl, '_blank'); // Membuka situs Fast.com
+        }
+
+        // Fungsi untuk membuka berita teknologi di Google News
+        function searchTechNews() {
+            const techNewsUrl = 'https://news.google.com/search?q=teknologi&hl=id&gl=ID&ceid=ID:id';
+            speak('Membuka berita terbaru tentang teknologi.');
+            output.textContent = 'Membuka berita teknologi...';
+            window.open(techNewsUrl, '_blank'); // Membuka Google News untuk berita teknologi
+        }
+
+        // Fungsi untuk mencari definisi kata di Google
+        function searchWordDefinition(word) {
+            const definitionUrl = `https://www.google.com/search?q=definisi+${encodeURIComponent(word)}`;
+            speak(`Mencari definisi kata ${word} melalui Google.`);
+            output.textContent = `Mencari definisi kata ${word}...`;
+            window.open(definitionUrl, '_blank'); // Membuka pencarian definisi kata di Google
+        }
+
+        // Fungsi untuk mencari informasi kesehatan di Google
+        function searchHealthInfo(topic) {
+            const healthUrl = `https://www.google.com/search?q=${encodeURIComponent(topic)}+kesehatan`;
+            speak(`Mencari informasi kesehatan tentang ${topic} melalui Google.`);
+            output.textContent = `Mencari informasi kesehatan tentang ${topic}...`;
+            window.open(healthUrl, '_blank'); // Membuka pencarian informasi kesehatan di Google
+        }
+
+        // Fungsi untuk memutar suara alam atau efek lainnya di YouTube
+        function playSoundOnYouTube(soundType) {
+            const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(soundType)}+sound`;
+            speak(`Mencari dan memutar suara ${soundType} di YouTube.`);
+            output.textContent = `Mencari suara ${soundType} di YouTube...`;
+            window.open(youtubeUrl, '_blank'); // Membuka YouTube di tab baru dengan pencarian suara
+        }
+
+        // Fungsi untuk mencari hasil pertandingan olahraga di Google
+        function searchSportsResults(sport) {
+            const sportsUrl = `https://www.google.com/search?q=hasil+pertandingan+${encodeURIComponent(sport)}`;
+            speak(`Mencari hasil pertandingan ${sport} melalui Google.`);
+            output.textContent = `Membuka hasil pertandingan ${sport}...`;
+            window.open(sportsUrl, '_blank'); // Membuka Google dengan pencarian hasil pertandingan
+        }
+
+        // Fungsi untuk mencari toko terdekat di Google Maps
+        function searchNearbyStore(storeType) {
+            const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(storeType)}+terdekat`;
+            speak(`Mencari ${storeType} terdekat di Google Maps.`);
+            output.textContent = `Mencari ${storeType} terdekat di Google Maps...`;
+            window.open(mapsUrl, '_blank'); // Membuka Google Maps dengan pencarian toko terdekat
+        }
+
+        // Fungsi untuk menambah barang masuk
+        function inputBarangMasuk() {
+            const namaBarang = prompt('Masukkan nama barang:');
+            const harga = parseFloat(prompt('Masukkan harga barang:'));
+            const quantity = parseInt(prompt('Masukkan jumlah barang masuk:'));
+            if (namaBarang && harga && quantity) {
+                const barangMasuk = {
+                    nama: namaBarang,
+                    harga: harga,
+                    quantity: quantity,
+                    tanggal: new Date().toLocaleString()
+                };
+                saveDataStok(barangMasuk, 'masuk');
+            } else {
+                speak('Data barang tidak valid.');
+            }
+        }
+
+        // Fungsi untuk menambah barang keluar
+        function inputBarangKeluar() {
+            const namaBarang = prompt('Masukkan nama barang:');
+            const harga = parseFloat(prompt('Masukkan harga barang:'));
+            const quantity = parseInt(prompt('Masukkan jumlah barang keluar:'));
+            if (namaBarang && harga && quantity) {
+                const barangKeluar = {
+                    nama: namaBarang,
+                    harga: harga,
+                    quantity: quantity,
+                    tanggal: new Date().toLocaleString()
+                };
+                saveDataStok(barangKeluar, 'keluar');
+            } else {
+                speak('Data barang tidak valid.');
+            }
+        }
+
+        // Fungsi untuk menyimpan data stok
+        function saveDataStok(data, tipe) {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            data.tipe = tipe;
+            stok.push(data);
+            localStorage.setItem('stok', JSON.stringify(stok));
+            speak(`Data barang ${data.nama} telah disimpan.`);
+            output.textContent = `Data barang ${data.nama} telah disimpan.`;
+        }
+
+        // Fungsi untuk melihat stok barang
+        function lihatStokBarang() {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            if (stok.length > 0) {
+                const daftarStok = stok.map(item => `${item.nama}, Harga: Rp${item.harga}, Quantity: ${item.quantity}, Tanggal: ${item.tanggal}, Tipe: ${item.tipe}`).join('\n');
+                speak(`Stok barang Anda: \n${daftarStok}`);
+                output.textContent = `Stok barang:\n${daftarStok}`;
+            } else {
+                speak('Belum ada stok barang.');
+                output.textContent = 'Belum ada stok barang.';
+            }
+        }
+
+        // Fungsi untuk menghapus stok barang berdasarkan nama
+        function hapusStokBarang() {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            const namaBarang = prompt('Masukkan nama barang yang ingin dihapus:');
+            const index = stok.findIndex(item => item.nama.toLowerCase() === namaBarang.toLowerCase());
+
+            if (index !== -1) {
+                stok.splice(index, 1); // Hapus barang
+                localStorage.setItem('stok', JSON.stringify(stok));
+                speak(`Barang ${namaBarang} berhasil dihapus.`);
+                output.textContent = `Barang ${namaBarang} berhasil dihapus.`;
+            } else {
+                speak('Barang tidak ditemukan.');
+                output.textContent = 'Barang tidak ditemukan.';
+            }
+        }
+
+        // Fungsi untuk mengedit stok barang
+        function editStokBarang() {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            const namaBarang = prompt('Masukkan nama barang yang ingin diedit:');
+            const index = stok.findIndex(item => item.nama.toLowerCase() === namaBarang.toLowerCase());
+
+            if (index !== -1) {
+                const hargaBaru = parseFloat(prompt(`Harga baru untuk ${namaBarang}:`)) || stok[index].harga;
+                const quantityBaru = parseInt(prompt(`Quantity baru untuk ${namaBarang}:`)) || stok[index].quantity;
+
+                stok[index].harga = hargaBaru;
+                stok[index].quantity = quantityBaru;
+                localStorage.setItem('stok', JSON.stringify(stok));
+
+                speak(`Barang ${namaBarang} berhasil diperbarui.`);
+                output.textContent = `Barang ${namaBarang} berhasil diperbarui.`;
+            } else {
+                speak('Barang tidak ditemukan.');
+                output.textContent = 'Barang tidak ditemukan.';
+            }
+        }
+
+        function updateStokBarang(namaBarang, quantityKeluar) {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            const barang = stok.find(item => item.nama === namaBarang);
+            if (barang) {
+                barang.quantity -= quantityKeluar;
+                if (barang.quantity < 0) barang.quantity = 0; // Pastikan quantity tidak negatif
+                localStorage.setItem('stok', JSON.stringify(stok));
+                speak(`Stok barang ${namaBarang} telah diperbarui. Sisa stok: ${barang.quantity}`);
+                output.textContent = `Sisa stok ${namaBarang}: ${barang.quantity}`;
+            } else {
+                speak('Barang tidak ditemukan.');
+                output.textContent = 'Barang tidak ditemukan.';
+            }
+        }
+
+        function inputBarangKeluar() {
+            const namaBarang = prompt('Masukkan nama barang:');
+            const quantity = parseInt(prompt('Masukkan jumlah barang keluar:'));
+            if (namaBarang && quantity && !isNaN(quantity)) {
+                updateStokBarang(namaBarang, quantity);
+            } else {
+                speak('Data barang tidak valid.');
+            }
+        }
+
+        // Fungsi untuk validasi input barang
+        function validasiBarang(nama, harga, quantity) {
+            if (!nama || !harga || isNaN(harga) || harga <= 0 || isNaN(quantity) || quantity <= 0) {
+                speak('Input tidak valid. Nama, harga, dan quantity harus valid.');
+                return false;
+            }
+            return true;
+        }
+
+        // Fungsi untuk input barang masuk dengan validasi
+        function inputBarangMasuk() {
+            const namaBarang = prompt('Masukkan nama barang:');
+            const harga = parseFloat(prompt('Masukkan harga barang:'));
+            const quantity = parseInt(prompt('Masukkan jumlah barang masuk:'));
+
+            if (validasiBarang(namaBarang, harga, quantity)) {
+                const barangMasuk = {
+                    nama: namaBarang,
+                    harga: harga,
+                    quantity: quantity,
+                    tanggal: new Date().toLocaleString()
+                };
+                saveDataStok(barangMasuk, 'masuk');
+            }
+        }
+
+        // Fungsi untuk input barang keluar dengan validasi
+        function inputBarangKeluar() {
+            const namaBarang = prompt('Masukkan nama barang:');
+            const harga = parseFloat(prompt('Masukkan harga barang:'));
+            const quantity = parseInt(prompt('Masukkan jumlah barang keluar:'));
+
+            if (validasiBarang(namaBarang, harga, quantity)) {
+                const barangKeluar = {
+                    nama: namaBarang,
+                    harga: harga,
+                    quantity: quantity,
+                    tanggal: new Date().toLocaleString()
+                };
+                saveDataStok(barangKeluar, 'keluar');
+            }
+        }
+
+
+        // Fungsi untuk notifikasi stok rendah
+        function cekStokRendah() {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            stok.forEach(item => {
+                if (item.quantity < 5) {
+                    speak(`Perhatian! Stok ${item.nama} rendah, sisa ${item.quantity}`);
+                }
+            });
+        }
+
+        // Jalankan pengecekan stok rendah secara berkala
+        setInterval(cekStokRendah, 3600000); // Cek setiap 1 jam (3600000 ms)
+
+
+        // Fungsi untuk melihat riwayat barang masuk/keluar
+        function lihatRiwayatBarang() {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+            if (stok.length > 0) {
+                const riwayat = stok.map(item => `${item.nama}, Harga: Rp${item.harga}, Quantity: ${item.quantity}, Tanggal: ${item.tanggal}, Tipe: ${item.tipe}`).join('\n');
+                speak(`Riwayat barang:\n${riwayat}`);
+                output.textContent = `Riwayat barang:\n${riwayat}`;
+            } else {
+                speak('Belum ada riwayat barang.');
+            }
+        }
+
+         // Fungsi untuk mengirim laporan stok ke WhatsApp 
+        function kirimLaporanStokWhatsApp() {
+            let stok = JSON.parse(localStorage.getItem('stok')) || [];
+
+            if (stok.length === 0) {
+                speak('Tidak ada data stok untuk dikirim.');
+                return;
+            }
+
+            // Membuat laporan stok
+            const laporan = stok.map(item => `Nama: ${item.nama}, Harga: Rp${item.harga}, Quantity: ${item.quantity}, Tanggal: ${item.tanggal}`).join('\n');
+
+            // Encode pesan laporan stok
+            const pesan = encodeURIComponent(`Laporan Stok Harian:\n${laporan}`);
+
+            // Nomor WhatsApp tujuan
+            const nomorTujuan = '+6282367136420'; // Ganti dengan nomor WhatsApp tujuan
+
+            // Membuka WhatsApp dengan URL
+            const whatsappUrl = `https://wa.me/${nomorTujuan}?text=${pesan}`;
+
+            // Membuka URL WhatsApp
+            window.open(whatsappUrl, '_blank');
+
+            speak('Laporan stok harian siap dikirim melalui WhatsApp.');
+            output.textContent = 'Laporan stok harian sedang dibuka di WhatsApp.';
+        }
+
+        // Fungsi untuk memicu pengiriman laporan stok secara manual
+        function kirimLaporanStok() {
+            kirimLaporanStokWhatsApp();
+        }
+
         // Mulai mendengarkan saat tombol ditekan
         micBtn.addEventListener('click', () => {
             recognition.start();
@@ -872,6 +1228,8 @@
                         openApp('instagram'); // Membuka Instagram
                     } else if (command.includes('buka facebook')) {
                         openApp('facebook'); // Membuka Facebook
+                    } else if (command.includes('buka google drive')) {
+                        openApp('google drive'); // Membuka Google Drive
                     } else if (command.includes('cuaca hari ini')) {
                         weatherToday(); // Menampilkan cuaca hari ini
                     } else if (transcript.includes("rute jalan ke")) {
@@ -989,7 +1347,7 @@
                         const result = calculateMath(expression);
                         speak(result);
                         output.textContent = result;
-                    
+
                     } else if (command.includes('input uang masuk')) {
                         inputUangMasuk();
                     } else if (command.includes('input uang keluar')) {
@@ -1130,10 +1488,8 @@
                             speak('Bahasa tidak dikenali. Silakan coba lagi dengan bahasa lain.');
                             output.textContent = 'Bahasa tidak dikenali.';
                         }
-
                     } else if (command.includes('berita terkini')) {
                         showLatestNews(); // Menampilkan berita terbaru di Google News
-
                     } else if (command.includes('carikan lokasi')) {
                         const location = command.replace('cari lokasi', '').trim(); // Ambil nama lokasi dari perintah
                         if (location) {
@@ -1141,7 +1497,120 @@
                         } else {
                             speak('Tolong sebutkan lokasi yang ingin dicari.');
                         }
+                    } else if (command.includes('berapa')) {
+                        const expression = command.replace('hitung', '').trim(); // Mengambil ekspresi perhitungan
+                        if (expression) {
+                            calculateWithGoogle(expression); // Menghitung menggunakan Google
+                        } else {
+                            speak('Tolong sebutkan perhitungan yang ingin dilakukan.');
+                        }
+                    } else if (command.includes('tampilkan cuaca di')) {
+                        const city = command.replace('lihat cuaca di', '').trim(); // Mengambil nama kota
+                        if (city) {
+                            openGoogleWeather(city); // Membuka cuaca Google di kota yang disebutkan
+                        } else {
+                            speak('Tolong sebutkan kota yang ingin dilihat cuacanya.');
+                        }
+                    } else if (command.includes('lihat zodiak')) {
+                        const zodiacSign = command.replace('lihat zodiak', '').trim(); // Mengambil nama zodiak
+                        if (zodiacSign) {
+                            openGoogleZodiac(zodiacSign); // Membuka zodiak di Google berdasarkan zodiak yang disebutkan
+                        } else {
+                            speak('Tolong sebutkan zodiak yang ingin dilihat.');
+                        }
+                    } else if (transcript.includes('carikan')) {
+                        const searchQuery = transcript.replace('carikan', '').trim();
+                        if (searchQuery) {
+                            searchGooglee(searchQuery);
+                        } else {
+                            speak('Tolong sebutkan apa yang ingin dicari di Google.');
+                        }
+                    } else if (command.includes('buatkan resep')) {
+                        const recipe = command.replace('buatkan resep', '').trim(); // Mengambil nama resep
+                        if (recipe) {
+                            searchRecipeOnCookpad(recipe); // Mencari resep di Cookpad
+                        } else {
+                            speak('Tolong sebutkan resep yang ingin dibuat.');
+                        }
+                    } else if (command.includes('lihat kalender')) {
+                        openGoogleCalendar(); // Membuka Google Kalender
+                    } else if (command.includes('cari buku')) {
+                        const bookTitle = command.replace('cari buku', '').trim(); // Mengambil judul buku
+                        if (bookTitle) {
+                            searchBook(bookTitle); // Mencari buku di Google
+                        } else {
+                            speak('Tolong sebutkan judul buku yang ingin dicari.');
+                        }
+                    } else if (command.includes('lihat kurs')) {
+                        const currencyPair = command.replace('lihat kurs', '').trim(); // Mengambil pasangan mata uang
+                        if (currencyPair) {
+                            searchCurrencyExchange(currencyPair); // Mencari kurs mata uang di Google
+                        } else {
+                            speak('Tolong sebutkan pasangan mata uang yang ingin dilihat.');
+                        }
+                    } else if (command.includes('cek prakiraan cuaca besok')) {
+                        const city = command.replace('cek prakiraan cuaca besok di', '').trim(); // Mengambil nama kota
+                        if (city) {
+                            searchWeatherTomorrow(city); // Membuka prakiraan cuaca besok di Google
+                        } else {
+                            speak('Tolong sebutkan kota untuk melihat prakiraan cuaca besok.');
+                        }
+                    } else if (command.includes('cek kecepatan internet')) {
+                        checkInternetSpeed(); // Membuka Fast.com untuk menguji kecepatan internet}
 
+                    } else if (command.includes('lihat berita teknologi')) {
+                        searchTechNews(); // Membuka berita teknologi melalui Google News}
+
+                    } else if (command.includes('cari definisi')) {
+                        const word = command.replace('cari definisi kata', '').trim(); // Mengambil kata yang dicari
+                        if (word) {
+                            searchWordDefinition(word); // Mencari definisi kata di Google
+                        } else {
+                            speak('Tolong sebutkan kata yang ingin dicari definisinya.');
+                        }
+                    } else if (command.includes('cari informasi kesehatan')) {
+                        const topic = command.replace('cari informasi kesehatan tentang', '').trim(); // Mengambil topik kesehatan
+                        if (topic) {
+                            searchHealthInfo(topic); // Mencari informasi kesehatan di Google
+                        } else {
+                            speak('Tolong sebutkan topik kesehatan yang ingin dicari.');
+                        }
+                    } else if (command.includes('putar suara')) {
+                        const soundType = command.replace('putar suara', '').trim(); // Mengambil jenis suara
+                        if (soundType) {
+                            playSoundOnYouTube(soundType); // Memutar suara di YouTube
+                        } else {
+                            speak('Tolong sebutkan suara yang ingin diputar.');
+                        }
+                    } else if (command.includes('lihat hasil pertandingan')) {
+                        const sport = command.replace('lihat hasil pertandingan', '').trim(); // Mengambil jenis olahraga
+                        if (sport) {
+                            searchSportsResults(sport); // Mencari hasil pertandingan olahraga di Google
+                        } else {
+                            speak('Tolong sebutkan olahraga yang ingin dilihat hasilnya.');
+                        }
+                    } else if (command.includes('cari toko terdekat')) {
+                        const storeType = command.replace('cari toko terdekat', '').trim(); // Mengambil jenis toko
+                        if (storeType) {
+                            searchNearbyStore(storeType); // Mencari toko terdekat di Google Maps
+                        } else {
+                            speak('Tolong sebutkan jenis toko yang ingin dicari.');
+                        }
+                    } else if (command.includes('hapus stok barang')) {
+                        hapusStokBarang(); // Hapus stok barang berdasarkan nama
+                    } else if (command.includes('edit stok barang')) {
+                        editStokBarang(); // Edit stok barang berdasarkan nama
+                    } else if (command.includes('buat barang masuk')) {
+                        inputBarangMasuk(); // barang masuk
+                    } else if (command.includes('buat barang keluar')) {
+                        inputBarangKeluar(); // barang keluar
+                    } else if (command.includes('lihat stok barang')) {
+                        lihatStokBarang(); // untuk lihat stok barang
+                    } else if (transcript.includes('lihat riwayat barang')) {
+                        lihatRiwayatBarang(); 
+                    } else if (transcript.includes('kirim laporan stok')) {
+                        kirimLaporanStok();
+                
                     } else {
                         speak('Perintah tidak dikenali. Coba lagi.');
                         output.textContent = 'Perintah tidak dikenali. Coba lagi.';
