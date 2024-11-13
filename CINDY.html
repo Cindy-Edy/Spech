@@ -1073,50 +1073,6 @@
             }
         }
 
-        // Fungsi untuk validasi input barang
-        function validasiBarang(nama, harga, quantity) {
-            if (!nama || !harga || isNaN(harga) || harga <= 0 || isNaN(quantity) || quantity <= 0) {
-                speak('Input tidak valid. Nama, harga, dan quantity harus valid.');
-                return false;
-            }
-            return true;
-        }
-
-        // Fungsi untuk input barang masuk dengan validasi
-        function inputBarangMasuk() {
-            const namaBarang = prompt('Masukkan nama barang:');
-            const harga = parseFloat(prompt('Masukkan harga barang:'));
-            const quantity = parseInt(prompt('Masukkan jumlah barang masuk:'));
-
-            if (validasiBarang(namaBarang, harga, quantity)) {
-                const barangMasuk = {
-                    nama: namaBarang,
-                    harga: harga,
-                    quantity: quantity,
-                    tanggal: new Date().toLocaleString()
-                };
-                saveDataStok(barangMasuk, 'masuk');
-            }
-        }
-
-        // Fungsi untuk input barang keluar dengan validasi
-        function inputBarangKeluar() {
-            const namaBarang = prompt('Masukkan nama barang:');
-            const harga = parseFloat(prompt('Masukkan harga barang:'));
-            const quantity = parseInt(prompt('Masukkan jumlah barang keluar:'));
-
-            if (validasiBarang(namaBarang, harga, quantity)) {
-                const barangKeluar = {
-                    nama: namaBarang,
-                    harga: harga,
-                    quantity: quantity,
-                    tanggal: new Date().toLocaleString()
-                };
-                saveDataStok(barangKeluar, 'keluar');
-            }
-        }
-
-
         // Fungsi untuk notifikasi stok rendah
         function cekStokRendah() {
             let stok = JSON.parse(localStorage.getItem('stok')) || [];
